@@ -1,0 +1,41 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/contact/list",
+    "pages/home/index",
+    "pages/chat/list",
+    "pages/chat/chat",
+    "pages/contact/search",
+    "pages/contact/detail"
+  ],
+  "subPackages": [],
+  "window": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "uni-app",
+    "navigationBarBackgroundColor": "#F8F8F8",
+    "backgroundColor": "#F8F8F8"
+  },
+  "tabBar": {
+    "list": [
+      {
+        "pagePath": "pages/chat/list",
+        "text": "聊天",
+        "iconPath": "static/tabbar/message.png",
+        "selectedIconPath": "static/tabbar/message_fill.png"
+      },
+      {
+        "pagePath": "pages/contact/list",
+        "text": "通讯录",
+        "iconPath": "static/tabbar/customer-add.png",
+        "selectedIconPath": "static/tabbar/customer-add-fill.png"
+      },
+      {
+        "pagePath": "pages/home/index",
+        "text": "个人中心",
+        "iconPath": "static/tabbar/customer-center.png",
+        "selectedIconPath": "static/tabbar/customer-center-fill.png"
+      }
+    ]
+  },
+  "usingComponents": {}
+}

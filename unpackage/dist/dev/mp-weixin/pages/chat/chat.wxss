@@ -1,0 +1,106 @@
+@charset "UTF-8";
+/* 水平间距 */
+/* 水平间距 */
+.container.data-v-bf16e7f4 {
+  background-color: #ededed;
+  padding: 20rpx;
+  padding-bottom: 120rpx;
+}
+.message-list.data-v-bf16e7f4 {
+  display: flex;
+  flex-direction: column;
+}
+.message-list .message-box.data-v-bf16e7f4 {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 30rpx;
+}
+.message-list .message-box .head-portrait.data-v-bf16e7f4 {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 10rpx;
+  flex-shrink: 0;
+}
+.message-list .message-box .content.data-v-bf16e7f4 {
+  margin: 0 10rpx;
+}
+.message-list .message-box .content .text.data-v-bf16e7f4 {
+  background-color: white;
+}
+.message-list .message-left.data-v-bf16e7f4 {
+  flex-direction: row;
+}
+.message-list .self-message-item.data-v-bf16e7f4 {
+  flex-direction: row-reverse;
+}
+.message-list .time-line.data-v-bf16e7f4 {
+  text-align: center;
+  margin: 30rpx;
+  font-size: 24rpx;
+  color: #666;
+}
+.self-message-text.data-v-bf16e7f4 {
+  position: relative;
+  background: #89d961;
+  padding: 20rpx;
+  margin: 0 10rpx 0 90rpx;
+  border-radius: 8rpx;
+}
+.self-message-text.data-v-bf16e7f4::after {
+  content: '';
+  position: absolute;
+  top: 20rpx;
+  /* 将箭头放置在div下方 20px */
+  right: -26rpx;
+  /* 将箭头放置在div的左边 10px */
+  border-width: 15rpx;
+  border-style: solid;
+  border-color: transparent transparent transparent #89d961;
+  /* 箭头颜色和位置 */
+}
+.other-message-text.data-v-bf16e7f4 {
+  position: relative;
+  background: white;
+  padding: 20rpx;
+  margin: 0 90rpx 0 10rpx;
+  border-radius: 8rpx;
+}
+.other-message-text.data-v-bf16e7f4::after {
+  content: '';
+  position: absolute;
+  top: 20rpx;
+  /* 将箭头放置在div下方 20px */
+  left: -26rpx;
+  /* 将箭头放置在div的左边 10px */
+  border-width: 15rpx;
+  border-style: solid;
+  border-color: transparent white transparent transparent;
+  /* 箭头颜色和位置 */
+}
+.bottom-operation-tabbar.data-v-bf16e7f4 {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  padding: 20rpx;
+  border-top: 2rpx solid #d8d8d8;
+  background-color: #f7f7f7;
+  width: 100vw;
+  box-sizing: border-box;
+}
+.bottom-operation-tabbar .tabbar-list.data-v-bf16e7f4 {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  width: 100%;
+}
+.bottom-operation-tabbar .tabbar-list .message-input.data-v-bf16e7f4 {
+  background-color: white;
+  padding: 10rpx;
+  border-radius: 10rpx;
+  max-height: 20vh;
+}
+.bottom-operation-tabbar .tabbar-list .message-send.data-v-bf16e7f4 {
+  flex-shrink: 0;
+  margin-left: 20rpx;
+}
+

@@ -1,0 +1,67 @@
+@charset "UTF-8";
+/* 水平间距 */
+/* 水平间距 */
+.container .info.data-v-380161d9 {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  background-color: white;
+  padding: 20rpx;
+}
+.container .info .avatar.data-v-380161d9 {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 10rpx;
+}
+.container .info .right.data-v-380161d9 {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding-left: 20rpx;
+  box-sizing: border-box;
+}
+.container .info .right .base.data-v-380161d9 {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+.container .info .right .base .remark_username.data-v-380161d9 {
+  font-weight: bolder;
+  font-size: 1.3rem;
+}
+.container .info .right .base .gender.data-v-380161d9 {
+  width: 30rpx;
+  height: 30rpx;
+  margin: 0 10rpx;
+}
+.container .info .right .base .star.data-v-380161d9 {
+  width: 30rpx;
+  height: 30rpx;
+}
+.container .info .right .item.data-v-380161d9 {
+  font-size: 0.8rem;
+  color: #666;
+  padding-top: 10rpx;
+}
+.container .operation-item.data-v-380161d9 {
+  margin-top: 20rpx;
+}
+.container .operation-item .button.data-v-380161d9 {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20rpx;
+  padding: 20rpx;
+  text-align: center;
+  background-color: white;
+}
+.container .operation-item .button .text.data-v-380161d9 {
+  color: #616c95;
+  font-weight: bold;
+  font-size: 0.9rem;
+  padding-left: 10rpx;
+}
+

@@ -1,0 +1,12 @@
+@charset "UTF-8";
+/* 水平间距 */
+/* 水平间距 */
+.container .empty-customer.data-v-4b6d2bb0 {
+  margin-top: 20rpx;
+  padding: 50rpx;
+  text-align: center;
+  font-size: 26rpx;
+  color: #999;
+  background-color: white;
+}
+

@@ -1,0 +1,43 @@
+@charset "UTF-8";
+/* 水平间距 */
+/* 水平间距 */
+view.data-v-71e217db {
+  box-sizing: border-box;
+}
+.container .info.data-v-71e217db {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  background-color: white;
+  padding: 50rpx 20rpx;
+}
+.container .info .avatar.data-v-71e217db {
+  width: 130rpx;
+  height: 130rpx;
+  border-radius: 10rpx;
+}
+.container .info .right.data-v-71e217db {
+  display: flex;
+  flex-direction: column;
+  padding-left: 20rpx;
+  box-sizing: border-box;
+}
+.container .info .right .base.data-v-71e217db {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+.container .info .right .base .remark_username.data-v-71e217db {
+  font-weight: bolder;
+  font-size: 1.3rem;
+}
+.container .info .right .item.data-v-71e217db {
+  font-size: 0.8rem;
+  color: #666;
+  padding-top: 10rpx;
+}
+.container .operation-item.data-v-71e217db {
+  margin-top: 20rpx;
+}
+
