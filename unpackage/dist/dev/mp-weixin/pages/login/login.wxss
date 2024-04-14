@@ -2,8 +2,13 @@
 /* 水平间距 */
 /* 水平间距 */
 .container.data-v-b237504c {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   position: relative;
   z-index: 9;
+  height: 100vh;
+  padding-top: 50%;
 }
 .container .gb.data-v-b237504c {
   width: 100vw;
@@ -17,32 +22,11 @@
   text-align: center;
   font-size: 1.1rem;
   font-weight: bold;
-  padding-top: 100rpx;
 }
-.container .login-main.data-v-b237504c {
-  background-color: white;
-  margin: 50rpx;
-  padding: 50rpx 30rpx;
-  border-radius: 10rpx;
-}
-.container .login-main .item.data-v-b237504c {
-  margin-bottom: 40rpx;
-}
-.container .login-main .item .title.data-v-b237504c {
+.container .login-button.data-v-b237504c {
+  width: 400rpx;
+  margin-top: 50rpx;
+  font: 1rem;
   font-weight: bold;
-  font-size: 0.9rem;
-  margin-bottom: 10rpx;
-}
-.container .login-main .item .input.data-v-b237504c {
-  border-radius: 50rpx;
-  border: 1rpx solid red;
-}
-.container .login-main .login-button.data-v-b237504c {
-  width: 100%;
-  height: 80rpx;
-  border-radius: 50rpx;
-  line-height: 80rpx;
-  font-weight: bold;
-  margin-top: 20rpx;
 }
 

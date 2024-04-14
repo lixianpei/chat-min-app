@@ -27,7 +27,9 @@
 				<uni-list-item
 					title="退出登录" 
 					showArrow
+					clickable
 					thumb-size="sm"
+					@click="logout()"
 				/>
 			</uni-list>
 			
@@ -63,6 +65,20 @@
 				uni.showToast({
 					title:'好友添加成功',
 					icon:'none',
+				})
+			},
+			logout() {
+				console.log('logout')
+				uni.showToast({
+					title:'退出成功',
+					icon:'none',
+					complete() {
+						setTimeout(function(){
+							uni.redirectTo({
+								url:'/pages/login/login'
+							})
+						},3000)
+					}
 				})
 			}
 		}

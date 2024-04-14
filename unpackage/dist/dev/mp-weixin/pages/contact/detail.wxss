@@ -12,20 +12,19 @@
   width: 100rpx;
   height: 100rpx;
   border-radius: 10rpx;
+  flex-shrink: 0;
 }
 .container .info .right.data-v-380161d9 {
   display: flex;
   flex-direction: column;
-  width: 100%;
   padding-left: 20rpx;
-  box-sizing: border-box;
+  width: 100%;
 }
 .container .info .right .base.data-v-380161d9 {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  width: 100%;
 }
 .container .info .right .base .remark_username.data-v-380161d9 {
   font-weight: bolder;

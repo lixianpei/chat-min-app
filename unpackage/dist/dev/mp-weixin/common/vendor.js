@@ -9628,9 +9628,173 @@ function normalizeComponent (
 /* 36 */,
 /* 37 */,
 /* 38 */,
-/* 39 */,
-/* 40 */,
-/* 41 */,
+/* 39 */
+/*!***********************************************!*\
+  !*** C:/wwwroot/chat/chat-min-app/api/api.js ***!
+  \***********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.ping = ping;
+var _request = __webpack_require__(/*! ../helper/request.js */ 40);
+function ping() {
+  return (0, _request.request)({
+    api: '/ping',
+    method: 'get',
+    loading: true
+  });
+}
+
+/***/ }),
+/* 40 */
+/*!******************************************************!*\
+  !*** C:/wwwroot/chat/chat-min-app/helper/request.js ***!
+  \******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(uni) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.request = request;
+var _config = __webpack_require__(/*! ./config.js */ 41);
+function request(config) {
+  var host = (0, _config.getChatApiRequestHost)();
+  var url = host + config.api;
+  var header = {
+    'X-Requested-With': 'XMLHttpRequest',
+    'Content-Type': 'application/json;charset=utf-8'
+  };
+
+  //是否显示加载中
+  var loading = config.loading ? config.loading : true;
+  return new Promise(function (resolve, reject) {
+    if (loading) {
+      uni.showLoading();
+    }
+    uni.request({
+      url: url,
+      data: config.data,
+      method: config.method,
+      header: header,
+      success: function success(_ref) {
+        var _ref$data = _ref.data,
+          code = _ref$data.code,
+          message = _ref$data.message,
+          data = _ref$data.data,
+          errMsg = _ref.errMsg,
+          statusCode = _ref.statusCode;
+        // 服务端返回的状态码
+        if (code != 200) {
+          //api请求成功，但处理返回错误
+          uni.showToast({
+            title: message,
+            duration: 5000,
+            icon: 'none'
+          });
+        }
+        resolve(data);
+      },
+      fail: function fail(res) {
+        uni.showToast({
+          title: '请求发生错误：' + (res.errMsg || 'error'),
+          duration: 5000,
+          icon: 'none'
+        });
+        reject(res);
+      },
+      complete: function complete(_ref2) {
+        var _ref2$data = _ref2.data,
+          code = _ref2$data.code,
+          message = _ref2$data.message,
+          data = _ref2$data.data,
+          errMsg = _ref2.errMsg,
+          statusCode = _ref2.statusCode;
+        if (loading) {
+          uni.hideLoading();
+        }
+        switch (statusCode) {
+          case 500:
+            uni.showToast({
+              title: '服务器异常',
+              duration: 5000,
+              icon: 'none'
+            });
+            break;
+          case 404:
+            uni.showToast({
+              title: '未知请求',
+              duration: 5000,
+              icon: 'none'
+            });
+            break;
+          case 403:
+            uni.showToast({
+              title: '无权访问',
+              duration: 5000,
+              icon: 'none'
+            });
+            break;
+        }
+      }
+    });
+  });
+}
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
+
+/***/ }),
+/* 41 */
+/*!*****************************************************!*\
+  !*** C:/wwwroot/chat/chat-min-app/helper/config.js ***!
+  \*****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(wx) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getChatApiRequestHost = getChatApiRequestHost;
+exports.getEnv = getEnv;
+// 定义版本信息
+var ENV_DEVELOP = "develop"; //开发环境
+var ENV_TRIAL = "trial"; //体验版-预发布
+var ENV_RELEASE = "release"; //正式版
+
+// 获取小程序版本：develop-开发版；trial-体验版；release-正式版
+function getEnv() {
+  var _accountInfo$miniProg;
+  var accountInfo = wx.getAccountInfoSync();
+  return (_accountInfo$miniProg = accountInfo.miniProgram.envVersion) !== null && _accountInfo$miniProg !== void 0 ? _accountInfo$miniProg : "develop";
+}
+
+// 获取api请求的host地址
+function getChatApiRequestHost() {
+  var env = getEnv();
+  console.log("env=".concat(env));
+  switch (env) {
+    case ENV_DEVELOP:
+      return "http://127.0.0.1:8080";
+    case ENV_TRIAL:
+      return "https://chat-pre.lixianpei.com/api";
+    case ENV_RELEASE:
+      return "https://chat.lixianpei.com/api";
+  }
+}
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/wx.js */ 1)["default"]))
+
+/***/ }),
 /* 42 */,
 /* 43 */,
 /* 44 */,
@@ -9700,9 +9864,7 @@ function normalizeComponent (
 /* 108 */,
 /* 109 */,
 /* 110 */,
-/* 111 */,
-/* 112 */,
-/* 113 */
+/* 111 */
 /*!************************************************************************************!*\
   !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js ***!
   \************************************************************************************/
@@ -9717,20 +9879,20 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 114));
-var _assertThisInitialized2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/assertThisInitialized */ 116));
+var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 112));
+var _assertThisInitialized2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/assertThisInitialized */ 114));
 var _slicedToArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ 5));
 var _typeof2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/typeof */ 13));
 var _toConsumableArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/toConsumableArray */ 18));
-var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 117));
+var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 115));
 var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
-var _inherits2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/inherits */ 118));
-var _possibleConstructorReturn2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/possibleConstructorReturn */ 119));
-var _getPrototypeOf2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/getPrototypeOf */ 120));
-var _wrapNativeSuper2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/wrapNativeSuper */ 121));
+var _inherits2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/inherits */ 116));
+var _possibleConstructorReturn2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/possibleConstructorReturn */ 117));
+var _getPrototypeOf2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/getPrototypeOf */ 118));
+var _wrapNativeSuper2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/wrapNativeSuper */ 119));
 var _classCallCheck2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/classCallCheck */ 23));
 var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/createClass */ 24));
-var _pages = _interopRequireDefault(__webpack_require__(/*! @/pages.json */ 123));
+var _pages = _interopRequireDefault(__webpack_require__(/*! @/pages.json */ 121));
 function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e34) { throw _e34; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e35) { didErr = true; err = _e35; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
@@ -10183,7 +10345,7 @@ var S = "development" === "development",
   x = true;
 var O = "";
 try {
-  O = (__webpack_require__(/*! uni-stat-config */ 124).default || __webpack_require__(/*! uni-stat-config */ 124)).appid;
+  O = (__webpack_require__(/*! uni-stat-config */ 122).default || __webpack_require__(/*! uni-stat-config */ 122)).appid;
 } catch (e) {}
 var E = {};
 function L(e) {
@@ -17517,7 +17679,7 @@ exports.default = Bs;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../webpack/buildin/global.js */ 3), __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/wx.js */ 1)["default"]))
 
 /***/ }),
-/* 114 */
+/* 112 */
 /*!************************************************************************************************!*\
   !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/@babel/runtime/regenerator/index.js ***!
   \************************************************************************************************/
@@ -17526,11 +17688,11 @@ exports.default = Bs;
 
 // TODO(Babel 8): Remove this file.
 
-var runtime = __webpack_require__(/*! @babel/runtime/helpers/regeneratorRuntime */ 115)();
+var runtime = __webpack_require__(/*! @babel/runtime/helpers/regeneratorRuntime */ 113)();
 module.exports = runtime;
 
 /***/ }),
-/* 115 */
+/* 113 */
 /*!*******************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/regeneratorRuntime.js ***!
   \*******************************************************************/
@@ -17851,7 +18013,7 @@ function _regeneratorRuntime() {
 module.exports = _regeneratorRuntime, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
-/* 116 */
+/* 114 */
 /*!**********************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/assertThisInitialized.js ***!
   \**********************************************************************/
@@ -17867,7 +18029,7 @@ function _assertThisInitialized(self) {
 module.exports = _assertThisInitialized, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
-/* 117 */
+/* 115 */
 /*!*****************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/asyncToGenerator.js ***!
   \*****************************************************************/
@@ -17907,7 +18069,7 @@ function _asyncToGenerator(fn) {
 module.exports = _asyncToGenerator, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
-/* 118 */
+/* 116 */
 /*!*********************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/inherits.js ***!
   \*********************************************************/
@@ -17934,7 +18096,7 @@ function _inherits(subClass, superClass) {
 module.exports = _inherits, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
-/* 119 */
+/* 117 */
 /*!**************************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/possibleConstructorReturn.js ***!
   \**************************************************************************/
@@ -17942,7 +18104,7 @@ module.exports = _inherits, module.exports.__esModule = true, module.exports["de
 /***/ (function(module, exports, __webpack_require__) {
 
 var _typeof = __webpack_require__(/*! ./typeof.js */ 13)["default"];
-var assertThisInitialized = __webpack_require__(/*! ./assertThisInitialized.js */ 116);
+var assertThisInitialized = __webpack_require__(/*! ./assertThisInitialized.js */ 114);
 function _possibleConstructorReturn(self, call) {
   if (call && (_typeof(call) === "object" || typeof call === "function")) {
     return call;
@@ -17954,7 +18116,7 @@ function _possibleConstructorReturn(self, call) {
 module.exports = _possibleConstructorReturn, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
-/* 120 */
+/* 118 */
 /*!***************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/getPrototypeOf.js ***!
   \***************************************************************/
@@ -17970,16 +18132,16 @@ function _getPrototypeOf(o) {
 module.exports = _getPrototypeOf, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
-/* 121 */
+/* 119 */
 /*!****************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/wrapNativeSuper.js ***!
   \****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-var getPrototypeOf = __webpack_require__(/*! ./getPrototypeOf.js */ 120);
+var getPrototypeOf = __webpack_require__(/*! ./getPrototypeOf.js */ 118);
 var setPrototypeOf = __webpack_require__(/*! ./setPrototypeOf.js */ 16);
-var isNativeFunction = __webpack_require__(/*! ./isNativeFunction.js */ 122);
+var isNativeFunction = __webpack_require__(/*! ./isNativeFunction.js */ 120);
 var construct = __webpack_require__(/*! ./construct.js */ 15);
 function _wrapNativeSuper(Class) {
   var _cache = typeof Map === "function" ? new Map() : undefined;
@@ -18010,7 +18172,7 @@ function _wrapNativeSuper(Class) {
 module.exports = _wrapNativeSuper, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
-/* 122 */
+/* 120 */
 /*!*****************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/isNativeFunction.js ***!
   \*****************************************************************/
@@ -18023,7 +18185,7 @@ function _isNativeFunction(fn) {
 module.exports = _isNativeFunction, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
-/* 123 */
+/* 121 */
 /*!****************************************************************************!*\
   !*** C:/wwwroot/chat/chat-min-app/pages.json?{"type":"origin-pages-json"} ***!
   \****************************************************************************/
@@ -18105,7 +18267,7 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 124 */
+/* 122 */
 /*!***************************************************************!*\
   !*** C:/wwwroot/chat/chat-min-app/pages.json?{"type":"stat"} ***!
   \***************************************************************/
@@ -18125,14 +18287,14 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
+/* 123 */,
+/* 124 */,
 /* 125 */,
 /* 126 */,
 /* 127 */,
 /* 128 */,
 /* 129 */,
-/* 130 */,
-/* 131 */,
-/* 132 */
+/* 130 */
 /*!*******************************************************************************************************!*\
   !*** C:/wwwroot/chat/chat-min-app/uni_modules/uni-search-bar/components/uni-search-bar/i18n/index.js ***!
   \*******************************************************************************************************/
@@ -18147,9 +18309,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _en = _interopRequireDefault(__webpack_require__(/*! ./en.json */ 133));
-var _zhHans = _interopRequireDefault(__webpack_require__(/*! ./zh-Hans.json */ 134));
-var _zhHant = _interopRequireDefault(__webpack_require__(/*! ./zh-Hant.json */ 135));
+var _en = _interopRequireDefault(__webpack_require__(/*! ./en.json */ 131));
+var _zhHans = _interopRequireDefault(__webpack_require__(/*! ./zh-Hans.json */ 132));
+var _zhHant = _interopRequireDefault(__webpack_require__(/*! ./zh-Hant.json */ 133));
 var _default = {
   en: _en.default,
   'zh-Hans': _zhHans.default,
@@ -18158,7 +18320,7 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 133 */
+/* 131 */
 /*!******************************************************************************************************!*\
   !*** C:/wwwroot/chat/chat-min-app/uni_modules/uni-search-bar/components/uni-search-bar/i18n/en.json ***!
   \******************************************************************************************************/
@@ -18168,7 +18330,7 @@ exports.default = _default;
 module.exports = JSON.parse("{\"uni-search-bar.cancel\":\"cancel\",\"uni-search-bar.placeholder\":\"Search enter content\"}");
 
 /***/ }),
-/* 134 */
+/* 132 */
 /*!***********************************************************************************************************!*\
   !*** C:/wwwroot/chat/chat-min-app/uni_modules/uni-search-bar/components/uni-search-bar/i18n/zh-Hans.json ***!
   \***********************************************************************************************************/
@@ -18178,7 +18340,7 @@ module.exports = JSON.parse("{\"uni-search-bar.cancel\":\"cancel\",\"uni-search-
 module.exports = JSON.parse("{\"uni-search-bar.cancel\":\"cancel\",\"uni-search-bar.placeholder\":\"请输入搜索内容\"}");
 
 /***/ }),
-/* 135 */
+/* 133 */
 /*!***********************************************************************************************************!*\
   !*** C:/wwwroot/chat/chat-min-app/uni_modules/uni-search-bar/components/uni-search-bar/i18n/zh-Hant.json ***!
   \***********************************************************************************************************/
@@ -18188,14 +18350,14 @@ module.exports = JSON.parse("{\"uni-search-bar.cancel\":\"cancel\",\"uni-search-
 module.exports = JSON.parse("{\"uni-search-bar.cancel\":\"cancel\",\"uni-search-bar.placeholder\":\"請輸入搜索內容\"}");
 
 /***/ }),
+/* 134 */,
+/* 135 */,
 /* 136 */,
 /* 137 */,
 /* 138 */,
 /* 139 */,
 /* 140 */,
-/* 141 */,
-/* 142 */,
-/* 143 */
+/* 141 */
 /*!****************************************************************************************!*\
   !*** C:/wwwroot/chat/chat-min-app/uni_modules/uni-icons/components/uni-icons/icons.js ***!
   \****************************************************************************************/

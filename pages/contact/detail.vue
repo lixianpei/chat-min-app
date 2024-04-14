@@ -92,19 +92,18 @@
 				width: 100rpx;
 				height: 100rpx;
 				border-radius: 10rpx;
+				flex-shrink: 0;
 			}
 			.right {
 				display: flex;
 				flex-direction: column;
-				width: 100%;
 				padding-left: 20rpx;
-				box-sizing: border-box;
+				width: 100%;
 				.base {
 					display: flex;
 					flex-direction: row;
 					justify-content: space-between;
 					align-items: center;
-					width: 100%;
 					.remark_username {
 						font-weight: bolder;
 						font-size: 1.3rem;
