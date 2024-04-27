@@ -23,3 +23,5 @@ export function createApp() {
   }
 }
 // #endif
+
+console.log("this......",Vue)

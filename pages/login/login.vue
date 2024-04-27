@@ -1,79 +1,231 @@
 <template>
-	<view class="container">
-		<image class="gb" src="/static/icon/login-image.png"></image>
-		<view class="hello">Go聊天</view>
-		<button
-			class="mini-btn login-button" 
-			type="primary" 
-			size="mini"
-			open-type="getPhoneNumber"
-			@getphonenumber="getPhonenNmber">
-			授权微信登录
-		</button>
-		<!-- <button type="default" open-type="getPhoneNumber" @getphonenumber="decryptPhoneNumber">获取手机号</button> -->
-
-	</view>
+  <div class="login-container">
+    <div class="login-form">
+      <form @submit.prevent="login">
+        <div class="" style="text-align: center;">
+			<button
+				class="avatar-button" 
+				open-type="chooseAvatar"
+				@chooseavatar="chooseavatar"
+			>
+				<image class="avatar" :src="avatarUrl"></image>
+			</button>
+        </div>
+        <div class="form-group">
+          <input type="text" v-model="phone" placeholder="手机号" required>
+        </div>
+        <div class="form-group">
+          <input type="nickname" v-model="nickname" @change="getNickname" placeholder="请输入昵称" class="weui-input" required>
+        </div>
+		
+		<button type="primary" :disabled="submitDisabled" class="login-button" form-type="submit" @click="onPhoneLogin()">登录</button>
+      </form>
+    </div>
+  </div>
 </template>
 
 <script>
-	import { ping } from '../../api/api'
-	export default {
-		data() {
-			return {
-				form: {
-					phone: 18083198680,
-					nickname: "HiHi",
-				}
+import { login, wxUserSave, userInfoSave, uploadFile, phoneLogin } from '../../api/api'
+import { isCanConnectionWebsocket } from '../../helper/websocket'
+export default {
+    data() {
+		return {
+			phone: '',
+			nickname: '',
+			avatar: '',
+			avatarUrl: "../../static/dog-avatar.webp",
+			defaultAvatarUrl: "../../static/dog-avatar.webp",
+			loading: false,
+		};
+    },
+	computed: {
+		submitDisabled() {
+			if (this.loading) {
+				return true //不允許點擊
+			} else if (this.phone.length == 0 || this.nickname.length == 0) {
+				return true//不允許點擊
 			}
-
+			return false
+		}
+	},
+	onLoad() {
+		this.wxAutoLogin()
+	},
+	methods: {
+		login() {
+		  
 		},
-		onLoad() {
-			ping().then(res => {
-				console.log('ping result:',res)
+		wxAutoLogin() {
+			let _this = this
+			uni.login({
+				"provider": "weixin",
+				"onlyAuthorize": true, // 微信登录仅请求授权认证
+				success: function(event){
+					const {code} = event
+					login({code: code}).then(res => {
+						console.log('login result:',res)
+						//登录成功后把token设置缓存中
+						if (res.userInfo.avatar) {
+							console.log("登录页面获取到了用户头像：",res.userInfo.avatar)
+							_this.avatarUrl = res.userInfo.avatar //必须取外部的_this，要不然数据无法更新
+							uni.setStorageSync("avatar",res.userInfo.avatar)
+						}
+						uni.setStorageSync("userInfo",res.userInfo)
+						uni.setStorageSync("token",res.token)
+						uni.setStorageSync("user_id",res.user_id)
+					}).catch(err => {
+						console.log(err)
+					})
+				},
+				fail: function (err) {
+					// 登录授权失败
+					// err.code是错误码
+				}
+			})
+		},
+		onPhoneLogin() {
+			if (this.loading == true) {
+				uni.showToast({
+					title: "请勿重复点击",
+					duration: 3000,
+					icon:'none'
+				})
+				return
+			}
+			if (this.phone.length == 0 || this.nickname.length == 0) {
+				uni.showToast({
+					title: "请输入信息",
+					duration: 3000,
+					icon:'none'
+				})
+				return
+			}
+			this.loading = true
+			phoneLogin({
+				"phone": this.phone,
+				"nickname": this.nickname,
+				"avatar": this.avatar,
+			}).then(res => {
+				//登录成功后把token设置缓存中
+				uni.setStorageSync("token",res.token)
+				uni.setStorageSync("user_id",res.user_id)
+				uni.setStorageSync("avatar",this.avatarUrl)
+				uni.showToast({
+					title: "登录成功",
+					duration: 5000,
+					icon:'none'
+				})
+				
+				//允许ws连接
+				isCanConnectionWebsocket()
+				
+				let _this =this
+				setTimeout(function(){
+					// uni.redirectTo({
+					// 	url:'/pages/chat/chat'
+					// })
+					uni.switchTab({
+						url:'/pages/chat/list'
+					})
+					_this.loading = false
+				},2000)
+				
 			}).catch(err => {
 				console.log(err)
 			})
 		},
-		onReady() {},
-		methods: {
-			getPhonenNmber(res) {
-				console.log(res.detail)
-				// 点击某个按钮，弹出请求微信授权界面。
-				// 点击允许按钮，获取用户微信绑定的手机号与openId
-				// 请求后端接口，实现登录。
-			},
-		}
-	}
+		chooseavatar(e) {
+			console.log(e)
+			let avatar = e.detail.avatarUrl ?? ''
+
+			//获取到微信头像后马上下载到本地，随后上传到服务器
+			uploadFile(avatar).then(res => {
+				console.log("uploadFileOk:", res)
+				//设置本地头像信息
+				this.avatarUrl = res.url
+				this.avatar = res.filepath
+				console.log(this.avatarUrl)
+				
+			}).catch(f => {
+				console.log("uploadFileError",f)
+			})
+		},
+		getNickname(e) {
+			console.log("getNickname...",e)
+			if (e.detail.value) {
+				//由于选择的昵称不能直接自动绑定model，因此需要手动更新model
+				this.nickname = e.detail.value	
+			}
+		},
+    }
+};
 </script>
 
+<style scoped>
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  /* background: linear-gradient(135deg, #1e5799, #7db9e8); */
+  background-color: white;
+}
 
-<style scoped lang="scss">
-	.container {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		position: relative;
-		z-index: 9;
-		height: 100vh;
-		padding-top: 50%;
-		.gb {
-			width: 100vw;
-			height: 100vh;
-			position: absolute;
-			top: 0;
-			left: 0;
-			z-index: -1;
-		}
-		.hello {
-			text-align: center;
-			font-size: 1.1rem;
-			font-weight: bold;
-		}
-		.login-button {
-			width: 400rpx;
-			margin-top: 50rpx;
-			font: 1rem;
-			font-weight: bold;
-		}
-	}
+.login-form {
+  width: 300px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+input {
+  width: 95%;
+  padding: 15rpx;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+login-button {
+  width: 100%;
+  /* padding: 12px; */
+  border: none;
+  border-radius: 5px;
+  background-color: #1a7f64;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+login-button:hover {
+  background-color: #135a47;
+}
+
+login-button:active {
+  background-color: #0e3c2f;
+}
+.avatar {
+	width: 100rpx;
+	height: 100rpx;
+	border-radius: 50%;
+}
+.avatar-button {
+	background: none !important; /* 移除按钮默认的背景色 */
+	border: none !important; /* 移除按钮默认的边框 */
+	padding: 0; /* 移除按钮内边距 */
+	outline: none; /* 移除按钮获得焦点时的边框样式 */
+}
+.avatar-button::after {
+	content: none !important;
+}
 </style>

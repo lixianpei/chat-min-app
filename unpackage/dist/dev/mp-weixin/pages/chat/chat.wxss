@@ -20,9 +20,15 @@
   height: 80rpx;
   border-radius: 10rpx;
   flex-shrink: 0;
+  background-color: #04aa6d;
 }
 .message-list .message-box .content.data-v-bf16e7f4 {
   margin: 0 10rpx;
+}
+.message-list .message-box .content .message-sender-name.data-v-bf16e7f4 {
+  padding: 0 0 10rpx 10rpx;
+  font-size: 0.8rem;
+  color: #333;
 }
 .message-list .message-box .content .text.data-v-bf16e7f4 {
   background-color: white;
@@ -33,7 +39,13 @@
 .message-list .self-message-item.data-v-bf16e7f4 {
   flex-direction: row-reverse;
 }
-.message-list .time-line.data-v-bf16e7f4 {
+.message-list .message-time.data-v-bf16e7f4 {
+  text-align: left;
+  margin-top: 20rpx;
+  font-size: 24rpx;
+  color: #666;
+}
+.message-list .middle-message.data-v-bf16e7f4 {
   text-align: center;
   margin: 30rpx;
   font-size: 24rpx;

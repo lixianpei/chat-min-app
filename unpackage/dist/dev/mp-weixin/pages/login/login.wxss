@@ -1,32 +1,61 @@
-@charset "UTF-8";
-/* 水平间距 */
-/* 水平间距 */
-.container.data-v-b237504c {
+
+.login-container.data-v-b237504c {
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  position: relative;
-  z-index: 9;
   height: 100vh;
-  padding-top: 50%;
+  /* background: linear-gradient(135deg, #1e5799, #7db9e8); */
+  background-color: white;
 }
-.container .gb.data-v-b237504c {
-  width: 100vw;
-  height: 100vh;
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: -1;
+.login-form.data-v-b237504c {
+  width: 300px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
 }
-.container .hello.data-v-b237504c {
+._h2.data-v-b237504c {
   text-align: center;
-  font-size: 1.1rem;
-  font-weight: bold;
+  margin-bottom: 20px;
+  color: #333;
 }
-.container .login-button.data-v-b237504c {
-  width: 400rpx;
-  margin-top: 50rpx;
-  font: 1rem;
-  font-weight: bold;
+.form-group.data-v-b237504c {
+  margin-bottom: 20px;
+}
+input.data-v-b237504c {
+  width: 95%;
+  padding: 15rpx;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+login-button.data-v-b237504c {
+  width: 100%;
+  /* padding: 12px; */
+  border: none;
+  border-radius: 5px;
+  background-color: #1a7f64;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+login-button.data-v-b237504c:hover {
+  background-color: #135a47;
+}
+login-button.data-v-b237504c:active {
+  background-color: #0e3c2f;
+}
+.avatar.data-v-b237504c {
+	width: 100rpx;
+	height: 100rpx;
+	border-radius: 50%;
+}
+.avatar-button.data-v-b237504c {
+	background: none !important; /* 移除按钮默认的背景色 */
+	border: none !important; /* 移除按钮默认的边框 */
+	padding: 0; /* 移除按钮内边距 */
+	outline: none; /* 移除按钮获得焦点时的边框样式 */
+}
+.avatar-button.data-v-b237504c::after {
+	content: none !important;
 }
 

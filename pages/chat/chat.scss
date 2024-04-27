@@ -15,9 +15,15 @@
 			height: 80rpx;
 			border-radius: 10rpx;
 			flex-shrink: 0;
+			background-color: #04aa6d;
 		}
 		.content {
 			margin: 0 10rpx;
+			.message-sender-name {
+				padding: 0 0 10rpx 10rpx;
+				font-size: 0.8rem;
+				color: #333;
+			}
 			.text {
 				background-color: white;
 			}
@@ -29,7 +35,13 @@
 	.self-message-item {
 		flex-direction: row-reverse;
 	}
-	.time-line {
+	.message-time {
+		text-align: left;
+		margin-top: 20rpx;
+		font-size: 24rpx;
+		color: #666;
+	}
+	.middle-message {
 		text-align: center;
 		margin: 30rpx;
 		font-size: 24rpx;
