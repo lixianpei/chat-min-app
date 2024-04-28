@@ -7,50 +7,45 @@
 				clearButton="always" 
 				cancelButton="none"
 				bgColor="#ffffff"
+				v-model="searchValue"
 				@confirm="search"
 			/>
 		</view>
 		
-		<view v-show="isShowEmptyCustomer" class="empty-customer">该用户不存在</view>
+		<view v-if="isShowEmptyCustomer" class="empty-customer">用户不存在</view>
 	</view>
 </template>
 
 <script>
+	import { searchUser } from '../../api/api.js'
 	export default {
 		data() {
 			return {
-				searchValue: '123123',
+				searchValue: '',
 				isShowEmptyCustomer: false,
 			}
 		},
 		methods: {
 			search(res) {
 				//TODO：reques 查詢用戶
-				let userInfo = {
-					uid: 1,
-					phone: "17859908727",
-					remark_username: "Ac",
-					username: "赵双岑",
-					nickname: "Super笔中情",
-					user_no: "superupzhaoshaungcen",
-					address: "福建省厦门市",
-					avatar: "https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/unicloudlogo.png",
-					gender: 1,//男-1；女-2；
-					isStar: 1,//是否标星
-					isFriend: 0,//是否好友
-					searchSource: "来自手机号搜索",//好友推荐、其他等等
-				}
-				this.isShowEmptyCustomer = userInfo && userInfo.uid > 0
-				if (!userInfo) {
-					uni.showToast({
-						title: '查不到相关用户信息',
-						icon: 'none'
-					})
-					return
-				}
-				uni.navigateTo({
-					url: '/pages/contact/detail'
+				searchUser({keyword: this.searchValue}).then(userInfo => {
+					if (userInfo && Object.keys(userInfo).length > 0) {
+						uni.navigateTo({
+							url: '/pages/contact/detail?id='+userInfo.id
+						})
+					} else {
+						this.isShowEmptyCustomer = true
+						uni.showToast({
+							title: '查不到相关用户信息',
+							icon: 'none'
+						})
+						return
+					}
+				}).catch(err => {
+					console.log(err)
 				})
+				
+				
 			},
 		},
 		onBackPress() {

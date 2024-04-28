@@ -8,6 +8,34 @@
     "miniprogram": {
       "list": [
         {
+          "name": "pages/contact/list",
+          "pathName": "pages/contact/list",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "pages/chat/chat",
+          "pathName": "pages/chat/chat",
+          "query": "id=2",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "pages/contact/detail",
+          "pathName": "pages/contact/detail",
+          "query": "id=1",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "pages/contact/search",
+          "pathName": "pages/contact/search",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
           "name": "pages/chat/chat",
           "pathName": "pages/chat/chat",
           "query": "",

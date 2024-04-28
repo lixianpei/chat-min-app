@@ -9630,9 +9630,13 @@ function normalizeComponent (
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.addFriend = addFriend;
+exports.getFriendContact = getFriendContact;
 exports.login = login;
 exports.phoneLogin = phoneLogin;
+exports.searchUser = searchUser;
 exports.uploadFile = uploadFile;
+exports.userDetail = userDetail;
 exports.userInfoSave = userInfoSave;
 exports.wxUserSave = wxUserSave;
 var _request = __webpack_require__(/*! ../helper/request.js */ 40);
@@ -9674,6 +9678,38 @@ function uploadFile(filepath) {
     method: 'POST',
     loading: true,
     filepath: filepath
+  });
+}
+function searchUser(data) {
+  return (0, _request.request)({
+    api: '/api/im/searchUser',
+    method: 'POST',
+    loading: true,
+    data: data
+  });
+}
+function userDetail(data) {
+  return (0, _request.request)({
+    api: '/api/im/userDetail',
+    method: 'POST',
+    loading: true,
+    data: data
+  });
+}
+function addFriend(data) {
+  return (0, _request.request)({
+    api: '/api/im/addFriend',
+    method: 'POST',
+    loading: true,
+    data: data
+  });
+}
+function getFriendContact(data) {
+  return (0, _request.request)({
+    api: '/api/im/getFriendContact',
+    method: 'POST',
+    loading: true,
+    data: data
   });
 }
 

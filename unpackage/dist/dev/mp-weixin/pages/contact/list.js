@@ -141,6 +141,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+var _api = __webpack_require__(/*! ../../api/api.js */ 39);
 //
 //
 //
@@ -171,25 +172,23 @@ exports.default = void 0;
 var _default = {
   data: function data() {
     return {
-      contactList: [{
-        id: 1,
-        username: "张三",
-        avatar: "https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/unicloudlogo.png"
-      }, {
-        id: 1,
-        username: "李四",
-        avatar: "https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/unicloudlogo.png"
-      }, {
-        id: 1,
-        username: "王五",
-        avatar: "https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/unicloudlogo.png"
-      }]
+      contactList: []
     };
   },
+  onShow: function onShow() {
+    var _this = this;
+    console.log("contact...onShow....");
+    (0, _api.getFriendContact)({}).then(function (res) {
+      console.log(res);
+      _this.contactList = res;
+    }).catch(function (err) {
+      console.log(err);
+    });
+  },
   methods: {
-    enterChat: function enterChat(chat) {
+    enterChat: function enterChat(item) {
       uni.navigateTo({
-        url: "/pages/chat/chat?chatId=0&chatTitle=".concat(chat.username, "&chatType=singleChat")
+        url: "/pages/chat/chat?id=".concat(item.id)
       });
     },
     enterSearchUser: function enterSearchUser() {

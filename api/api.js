@@ -46,3 +46,39 @@ export function uploadFile(filepath) {
 		filepath: filepath
 	});
 }
+
+
+export function searchUser(data) {
+	return request({
+		api: '/api/im/searchUser',
+		method: 'POST',
+		loading: true,
+		data: data
+	});
+}
+
+export function userDetail(data) {
+	return request({
+		api: '/api/im/userDetail',
+		method: 'POST',
+		loading: true,
+		data: data
+	});
+}
+
+export function addFriend(data) {
+	return request({
+		api: '/api/im/addFriend',
+		method: 'POST',
+		loading: true,
+		data: data
+	});
+}
+export function getFriendContact(data) {
+	return request({
+		api: '/api/im/getFriendContact',
+		method: 'POST',
+		loading: true,
+		data: data
+	});
+}

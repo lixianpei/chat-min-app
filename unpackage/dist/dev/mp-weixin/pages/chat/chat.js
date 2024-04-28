@@ -142,6 +142,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _config = __webpack_require__(/*! ../../helper/config */ 41);
+var _api = __webpack_require__(/*! ../../api/api.js */ 39);
+//
+//
 //
 //
 //
@@ -202,6 +205,9 @@ var _default = {
     return {
       isGroupChat: true,
       userInfo: uni.getStorageSync('userInfo'),
+      userAvatar: uni.getStorageSync('avatar'),
+      friendInfo: {},
+      //私聊用户信息
       form: {
         textMessage: "" //文本消息
       },
@@ -212,10 +218,22 @@ var _default = {
   created: function created() {},
   mounted: function mounted(option) {},
   onLoad: function onLoad(option) {
+    var _this2 = this;
     //option为object类型，会序列化上个页面传递的参数
-    console.log(option); //打印出上个页面传递的参数。
-    uni.setNavigationBarTitle({
-      title: option.chatTitle || "聊天室"
+    console.log("chat.onLoad.option...", option); //打印出上个页面传递的参数。
+    //查询好友信息
+    (0, _api.userDetail)({
+      id: parseInt(option.id || 0)
+    }).then(function (res) {
+      _this2.friendInfo = res;
+      _this2.friendInfo.id = parseInt(res.id);
+      if (_this2.friendInfo.id) {
+        uni.setNavigationBarTitle({
+          title: _this2.friendInfo.nickname || "聊天室"
+        });
+      }
+    }).catch(function (err) {
+      console.log(err);
     });
   },
   onShow: function onShow() {
@@ -271,21 +289,40 @@ var _default = {
       this.messageList.push(messageData);
     },
     handleWebsocketData: function handleWebsocketData(message) {
+      var _this3 = this;
       if (message == "ping") {
         //发送pong返回给服务器
       } else {
         //处理业务数据
         var messageData = JSON.parse(message);
+        if (messageData) {}
+        var sender = parseInt(messageData.sender);
+        var receiver = parseInt(messageData.receiver);
+        var groupId = parseInt(messageData.groupId);
+        var friendId = this.friendInfo.id;
+        console.log("\u6D88\u606F\u6765\u4E86\uFF0C\u5F53\u524D\u804A\u5929\u6846\u597D\u53CBID=".concat(friendId, " sender=").concat(sender, " receiver=").concat(receiver, " groupId=").concat(groupId));
+        if (friendId !== sender) {
+          //私聊判断消息是否属于当前页面的用户
+          console.log("\u6D88\u606F\u6765\u4E86\uFF0C\u4F46\u4E0D\u5C5E\u4E8E\u5F53\u524D\u804A\u5929\u5BA4\u7684\u597D\u53CB\u4FE1\u606F\uFF0C\u6682\u4E0D\u663E\u793A\uFF0C\uFF0C\u5F53\u524D\u804A\u5929\u6846\u597D\u53CBID=".concat(friendId, " sender=").concat(sender, " receiver=").concat(receiver, " groupId=").concat(groupId));
+          return;
+        }
         var messageTypes = ['text', 'entryGroup', 'addFriend', 'userEntry', 'userExit', 'binary'];
         if (messageTypes.includes(messageData.type)) {
           console.log("能处理的消息：", messageData);
           this.messageList.push(messageData);
-          //this.showOtherUserMessage(messageData)
+          this.$nextTick(function () {
+            _this3.scrollToBottom();
+          });
         } else {
           //不支持显示的消息
           console.log('消息不支持显示:', messageData);
         }
       }
+    },
+    scrollToBottom: function scrollToBottom() {
+      uni.pageScrollTo({
+        selector: "#viewBottomTag"
+      });
     }
   }
 };

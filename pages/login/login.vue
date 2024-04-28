@@ -1,6 +1,6 @@
 <template>
-  <div class="login-container">
-    <div class="login-form">
+  <view class="login-container">
+    <view class="login-form">
       <form @submit.prevent="login">
         <div class="" style="text-align: center;">
 			<button
@@ -20,8 +20,8 @@
 		
 		<button type="primary" :disabled="submitDisabled" class="login-button" form-type="submit" @click="onPhoneLogin()">登录</button>
       </form>
-    </div>
-  </div>
+    </view>
+  </view>
 </template>
 
 <script>
@@ -51,6 +51,8 @@ export default {
 	onLoad() {
 		this.wxAutoLogin()
 	},
+	mounted() {
+	},
 	methods: {
 		login() {
 		  
@@ -63,11 +65,10 @@ export default {
 				success: function(event){
 					const {code} = event
 					login({code: code}).then(res => {
-						console.log('login result:',res)
 						//登录成功后把token设置缓存中
 						if (res.userInfo.avatar) {
-							console.log("登录页面获取到了用户头像：",res.userInfo.avatar)
-							_this.avatarUrl = res.userInfo.avatar //必须取外部的_this，要不然数据无法更新
+							_this.avatarUrl = res.avatarUrl
+							_this.avatar = res.userInfo.avatar //必须取外部的_this，要不然数据无法更新
 							uni.setStorageSync("avatar",res.userInfo.avatar)
 						}
 						uni.setStorageSync("userInfo",res.userInfo)
@@ -119,15 +120,14 @@ export default {
 				//允许ws连接
 				isCanConnectionWebsocket()
 				
-				let _this =this
-				setTimeout(function(){
+				setTimeout(() => {
 					// uni.redirectTo({
 					// 	url:'/pages/chat/chat'
 					// })
 					uni.switchTab({
 						url:'/pages/chat/list'
 					})
-					_this.loading = false
+					this.loading = false
 				},2000)
 				
 			}).catch(err => {

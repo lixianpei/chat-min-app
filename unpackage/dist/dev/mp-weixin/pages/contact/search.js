@@ -164,6 +164,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+var _api = __webpack_require__(/*! ../../api/api.js */ 39);
+//
 //
 //
 //
@@ -184,41 +186,31 @@ exports.default = void 0;
 var _default = {
   data: function data() {
     return {
-      searchValue: '123123',
+      searchValue: '',
       isShowEmptyCustomer: false
     };
   },
   methods: {
     search: function search(res) {
+      var _this = this;
       //TODO：reques 查詢用戶
-      var userInfo = {
-        uid: 1,
-        phone: "17859908727",
-        remark_username: "Ac",
-        username: "赵双岑",
-        nickname: "Super笔中情",
-        user_no: "superupzhaoshaungcen",
-        address: "福建省厦门市",
-        avatar: "https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/unicloudlogo.png",
-        gender: 1,
-        //男-1；女-2；
-        isStar: 1,
-        //是否标星
-        isFriend: 0,
-        //是否好友
-        searchSource: "来自手机号搜索" //好友推荐、其他等等
-      };
-
-      this.isShowEmptyCustomer = userInfo && userInfo.uid > 0;
-      if (!userInfo) {
-        uni.showToast({
-          title: '查不到相关用户信息',
-          icon: 'none'
-        });
-        return;
-      }
-      uni.navigateTo({
-        url: '/pages/contact/detail'
+      (0, _api.searchUser)({
+        keyword: this.searchValue
+      }).then(function (userInfo) {
+        if (userInfo && Object.keys(userInfo).length > 0) {
+          uni.navigateTo({
+            url: '/pages/contact/detail?id=' + userInfo.id
+          });
+        } else {
+          _this.isShowEmptyCustomer = true;
+          uni.showToast({
+            title: '查不到相关用户信息',
+            icon: 'none'
+          });
+          return;
+        }
+      }).catch(function (err) {
+        console.log(err);
       });
     }
   },

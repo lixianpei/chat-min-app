@@ -194,6 +194,7 @@ var _default = {
   onLoad: function onLoad() {
     this.wxAutoLogin();
   },
+  mounted: function mounted() {},
   methods: {
     login: function login() {},
     wxAutoLogin: function wxAutoLogin() {
@@ -207,11 +208,10 @@ var _default = {
           (0, _api.login)({
             code: code
           }).then(function (res) {
-            console.log('login result:', res);
             //登录成功后把token设置缓存中
             if (res.userInfo.avatar) {
-              console.log("登录页面获取到了用户头像：", res.userInfo.avatar);
-              _this.avatarUrl = res.userInfo.avatar; //必须取外部的_this，要不然数据无法更新
+              _this.avatarUrl = res.avatarUrl;
+              _this.avatar = res.userInfo.avatar; //必须取外部的_this，要不然数据无法更新
               uni.setStorageSync("avatar", res.userInfo.avatar);
             }
             uni.setStorageSync("userInfo", res.userInfo);
@@ -263,7 +263,6 @@ var _default = {
 
         //允许ws连接
         (0, _websocket.isCanConnectionWebsocket)();
-        var _this = _this2;
         setTimeout(function () {
           // uni.redirectTo({
           // 	url:'/pages/chat/chat'
@@ -271,7 +270,7 @@ var _default = {
           uni.switchTab({
             url: '/pages/chat/list'
           });
-          _this.loading = false;
+          _this2.loading = false;
         }, 2000);
       }).catch(function (err) {
         console.log(err);

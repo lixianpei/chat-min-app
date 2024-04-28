@@ -1,11 +1,11 @@
 <template>
 	<view class="container">
 		<view class="info">
-			<image class="avatar" :src="userInfo.avatar"></image>
+			<image class="avatar" :src="userInfo.avatarUrl"></image>
 			<view class="right">
 				<view class="base">
 					<view>
-						<text class="remark_username">{{userInfo.remark_username}}</text>
+						<text class="remark_username">{{userInfo.user_name || userInfo.nickname}}</text>
 						<image v-if="userInfo.gender == 1" class="gender" src="/static/icon/man.png"></image>
 						<image v-else-if="userInfo.gender == 2" class="gender" src="/static/icon/woman.png"></image>
 					</view>
@@ -14,7 +14,7 @@
 					</view>
 				</view>
 				<view class="item">昵称：{{userInfo.nickname||"-"}}</view>
-				<view class="item">聊天号：{{userInfo.user_no||"-"}}</view>
+				<view class="item">聊天号：{{userInfo.id||"-"}}</view>
 				<view class="item">地区：{{userInfo.address||"-"}}</view>
 				<view class="item"></view>
 				
@@ -47,6 +47,7 @@
 </template>
 
 <script>
+	import { userDetail,addFriend } from '../../api/api.js'
 	export default {
 		data() {
 			return {
@@ -61,19 +62,39 @@
 					avatar: "https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/unicloudlogo.png",
 					gender: 1,//男-1；女-2；
 					isStar: 1,//是否标星
-					isFriend: 0,//是否好友
 					searchSource: "来自手机号搜索",//好友推荐、其他等等
-				}
+				},
 			}
 		},
 		onLoad(option) {
 			console.log("detail:",option)
+			userDetail({id: parseInt(option.id)}).then(res => {
+				console.log(res)
+				this.userInfo = res
+			}).catch(err => {
+				console.log(err)
+			})
 		},
 		methods: {
 			addContactUser() {
-				uni.showToast({
-					title:'好友添加成功',
-					icon:'none',
+				addFriend({
+					"userId": this.userInfo.id,
+					"status": 2,//发起申请
+				}).then(res => {
+					console.log(res)
+					uni.showToast({
+						title:'操作成功',
+						icon:'none',
+						duration: 5000,
+						mask: true,
+					})
+					setTimeout(() => {
+						uni.redirectTo({
+							url:'/pages/chat/chat?id='+this.userInfo.id
+						})
+					},2000)
+				}).catch(err => {
+					
 				})
 			}
 		}

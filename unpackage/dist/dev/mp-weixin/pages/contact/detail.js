@@ -170,6 +170,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+var _api = __webpack_require__(/*! ../../api/api.js */ 39);
 //
 //
 //
@@ -234,21 +235,42 @@ var _default = {
         //男-1；女-2；
         isStar: 1,
         //是否标星
-        isFriend: 0,
-        //是否好友
         searchSource: "来自手机号搜索" //好友推荐、其他等等
       }
     };
   },
   onLoad: function onLoad(option) {
+    var _this = this;
     console.log("detail:", option);
+    (0, _api.userDetail)({
+      id: parseInt(option.id)
+    }).then(function (res) {
+      console.log(res);
+      _this.userInfo = res;
+    }).catch(function (err) {
+      console.log(err);
+    });
   },
   methods: {
     addContactUser: function addContactUser() {
-      uni.showToast({
-        title: '好友添加成功',
-        icon: 'none'
-      });
+      var _this2 = this;
+      (0, _api.addFriend)({
+        "userId": this.userInfo.id,
+        "status": 2 //发起申请
+      }).then(function (res) {
+        console.log(res);
+        uni.showToast({
+          title: '操作成功',
+          icon: 'none',
+          duration: 5000,
+          mask: true
+        });
+        setTimeout(function () {
+          uni.redirectTo({
+            url: '/pages/chat/chat?id=' + _this2.userInfo.id
+          });
+        }, 2000);
+      }).catch(function (err) {});
     }
   }
 };

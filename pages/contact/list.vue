@@ -18,7 +18,7 @@
 			<template v-for="(contact,index) in contactList">
 				<view class="item" @click="enterChat(contact)" :key="index">
 					<image class="cover" :src="contact.avatar"></image>
-					<view class="name">{{contact.username||"EmptyUsername"}}</view>
+					<view class="name">{{contact.nickname||"EmptyNickname"}}</view>
 				</view>
 			</template>
 		</view>
@@ -26,32 +26,26 @@
 </template>
 
 <script>
+	import { getFriendContact } from '../../api/api.js'
 	export default {
 		data() {
 			return {
-				contactList: [
-					{
-						id: 1,
-						username: "张三",
-						avatar: "https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/unicloudlogo.png",
-					},
-					{
-						id: 1,
-						username: "李四",
-						avatar: "https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/unicloudlogo.png",
-					},
-					{
-						id: 1,
-						username: "王五",
-						avatar: "https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/unicloudlogo.png",
-					}
-				],
+				contactList: [],
 			}
 		},
+		onShow() {
+			console.log("contact...onShow....")
+			getFriendContact({}).then(res => {
+				console.log(res)
+				this.contactList = res
+			}).catch(err => {
+				console.log(err)
+			})
+		},
 		methods: {
-			enterChat(chat){
+			enterChat(item){
 				uni.navigateTo({
-					url: `/pages/chat/chat?chatId=0&chatTitle=${chat.username}&chatType=singleChat`
+					url: `/pages/chat/chat?id=${item.id}`
 				});
 			},
 			enterSearchUser(){
