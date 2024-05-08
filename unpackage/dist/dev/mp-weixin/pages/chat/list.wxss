@@ -1,4 +1,14 @@
 @charset "UTF-8";
 /* 水平间距 */
 /* 水平间距 */
+.single-line-text.data-v-ca06d368 {
+  white-space: nowrap;
+  /* 禁止文本换行 */
+  overflow: hidden;
+  /* 隐藏超出容器范围的内容 */
+  text-overflow: ellipsis;
+  /* 如果内容溢出，用省略号表示 */
+  width: 200px;
+  /* 宽度限制 */
+}
 

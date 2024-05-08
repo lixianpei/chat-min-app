@@ -12,7 +12,7 @@
 			</button>
         </div>
         <div class="form-group">
-          <input type="text" v-model="phone" placeholder="手机号" required>
+          <input type="number" v-model="phone" placeholder="手机号" required>
         </div>
         <div class="form-group">
           <input type="nickname" v-model="nickname" @change="getNickname" placeholder="请输入昵称" class="weui-input" required>
@@ -26,12 +26,12 @@
 
 <script>
 import { login, wxUserSave, userInfoSave, uploadFile, phoneLogin } from '../../api/api'
-import { isCanConnectionWebsocket } from '../../helper/websocket'
+import { connectWebSocket } from '../../helper/websocket'
 export default {
     data() {
 		return {
-			phone: '',
-			nickname: '',
+			phone: '18083198680',
+			nickname: 'Lixp',
 			avatar: '',
 			avatarUrl: "../../static/dog-avatar.webp",
 			defaultAvatarUrl: "../../static/dog-avatar.webp",
@@ -73,7 +73,7 @@ export default {
 						}
 						uni.setStorageSync("userInfo",res.userInfo)
 						uni.setStorageSync("token",res.token)
-						uni.setStorageSync("user_id",res.user_id)
+						uni.setStorageSync("userId",res.userId)
 					}).catch(err => {
 						console.log(err)
 					})
@@ -88,6 +88,14 @@ export default {
 			if (this.loading == true) {
 				uni.showToast({
 					title: "请勿重复点击",
+					duration: 3000,
+					icon:'none'
+				})
+				return
+			}
+			if (!this.avatar) {
+				uni.showToast({
+					title: "请选择头像信息",
 					duration: 3000,
 					icon:'none'
 				})
@@ -109,7 +117,7 @@ export default {
 			}).then(res => {
 				//登录成功后把token设置缓存中
 				uni.setStorageSync("token",res.token)
-				uni.setStorageSync("user_id",res.user_id)
+				uni.setStorageSync("userId",res.userId)
 				uni.setStorageSync("avatar",this.avatarUrl)
 				uni.showToast({
 					title: "登录成功",
@@ -117,8 +125,9 @@ export default {
 					icon:'none'
 				})
 				
-				//允许ws连接
-				isCanConnectionWebsocket()
+				//ws连接
+				//connectWebSocket()
+				connectWebSocket() 
 				
 				setTimeout(() => {
 					// uni.redirectTo({
@@ -218,6 +227,7 @@ login-button:active {
 	width: 100rpx;
 	height: 100rpx;
 	border-radius: 50%;
+	background-color: #1aad19;
 }
 .avatar-button {
 	background: none !important; /* 移除按钮默认的背景色 */

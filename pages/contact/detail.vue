@@ -81,20 +81,13 @@
 					"userId": this.userInfo.id,
 					"status": 2,//发起申请
 				}).then(res => {
-					console.log(res)
-					uni.showToast({
-						title:'操作成功',
-						icon:'none',
-						duration: 5000,
-						mask: true,
-					})
 					setTimeout(() => {
 						uni.redirectTo({
 							url:'/pages/chat/chat?id='+this.userInfo.id
 						})
 					},2000)
 				}).catch(err => {
-					
+					console.log("err////",err)
 				})
 			}
 		}

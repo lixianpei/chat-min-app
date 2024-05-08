@@ -2,6 +2,7 @@
 	background-color: #ededed;
 	padding: 20rpx;
 	padding-bottom: 120rpx;
+	position: relative;
 }
 .message-list {
 	display: flex;
@@ -10,6 +11,7 @@
 		display: flex;
 		align-items: flex-start;
 		margin-bottom: 30rpx;
+		word-break: break-word;
 		.head-portrait {
 			width: 80rpx;
 			height: 80rpx;
@@ -86,7 +88,7 @@
 
 // 底部操作区域
 .bottom-operation-tabbar {
-	position: fixed;
+	position: absolute;
 	bottom: 0;
 	left: 0;
 	padding: 20rpx;
@@ -94,6 +96,8 @@
 	background-color: #f7f7f7;
 	width: 100vw;
 	box-sizing: border-box;
+	z-index: 99;
+	flex-shrink: 0;
 	.tabbar-list {
 		display: flex;
 		flex-direction: row;

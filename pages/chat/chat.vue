@@ -1,10 +1,11 @@
 <template>
-	<view class="container">
-		<view id="messageContainer" class="message-list scroller">
+	<view class="container" :style="{bottom: pageBottomHeight + 'px'}">
+		<view class="message-list scroller">
 			<template v-for="(message,index) in messageList">
 				<!-- 事件类型：消息 -->
+				<!-- <view>{{message.content||'--'}}</view> -->
 				<view
-					v-if="message.type == 'text'"
+					v-if="message.type == 1"
 					class="message-box" 
 					:class="message.sender == userInfo.id ? 'self-message-item' : ''" 
 					:key="index"
@@ -12,7 +13,7 @@
 					<!-- 用户头像 -->
 					<image 
 						class="head-portrait" 
-						:src="message.sender == userAvatar ? userAvatar : message.senderInfo.avatar">
+						:src="message.sender == userInfo.id ? userAvatar : message.senderInfo.avatarUrl">
 					</image>
 					
 					<!-- 消息内容 -->
@@ -21,7 +22,7 @@
 						<view :class="message.sender == userInfo.id ? 'self-message-text' : 'other-message-text'">
 							{{message.content||"empty message..."}}
 							
-							<view class="message-time">{{message.time}}</view>
+							<view class="message-time">{{message.createdAt}}</view>
 						</view>
 					</view>
 				</view>
@@ -45,9 +46,11 @@
 					:show-confirm-bar="false"
 					hold-keyboard
 					auto-height
-					:adjust-position="true"
+					:adjust-position="false"
 					cursor-spacing="20"
 					placeholder="Message..."
+					@focus="inputFocus"
+					@blur="inputBlur"
 				/>
 				<button class="mini-btn item message-send" type="primary" size="mini" @click="clickSendMessage()">发送</button>	
 			</view>
@@ -57,10 +60,20 @@
 
 <script>
 	import { getWebsocketHost } from '../../helper/config'
-	import { userDetail } from '../../api/api.js'
+	import { userDetail,setMessageReadStatus,getMessageList,getRoomList } from '../../api/api.js'
+	import { Enum } from '../../helper/enum'
+	import { connectWebSocket } from '../../helper/websocket.js'
+	import { getDatetime } from '../../helper/date.js'
 	export default {
 		data() {
 			return {
+				messageList: [
+					{
+						id: 1,
+						type: 1,
+						content: "ddddddddddd",
+					}
+				],
 				isGroupChat: true,
 				userInfo: uni.getStorageSync('userInfo'),
 				userAvatar: uni.getStorageSync('avatar'),
@@ -68,57 +81,134 @@
 				form: {
 					textMessage: "",//文本消息
 				},
-				messageList: [],
+				pageBottomHeight: 0,
+				roomInfo: {},//聊天室信息
 			}
 		},
 		created() {
 		},
 		mounted(option) {
 		},
-		onLoad: function (option) { //option为object类型，会序列化上个页面传递的参数
+		onLoad: function (option) {
+			
+			//option为object类型，会序列化上个页面传递的参数
 			console.log("chat.onLoad.option...",option); //打印出上个页面传递的参数。
-			//查询好友信息
-			userDetail({id: parseInt(option.id||0)}).then(res => {
-				this.friendInfo = res
-				this.friendInfo.id = parseInt(res.id)
-				if (this.friendInfo.id) {
-					uni.setNavigationBarTitle({
-						title: this.friendInfo.nickname || "聊天室"
-					})
-				}
-			}).catch(err => {
-				console.log(err)
-			})
+			this.handleAsyncInfo(option)
 		},
 		onShow() {
-			let _this = this
-			uni.onSocketMessage(function (res) {
+			uni.onSocketMessage(res => {
 			  console.log('Chat...收到服务器内容：' + res.data);
-			  _this.handleWebsocketData(res.data)
+			  this.handleWebsocketData(res.data)
 			})
+			
+			
 		},
 		methods: {
+			async handleAsyncInfo(option) {
+				console.log('查询聊天室消息------------')
+				await getRoomList({roomId: option.roomId ?? 0}).then(res => {
+					console.log("roomList",res)
+					let roomInfo = res[0] ?? ""
+					if (!roomInfo) {
+						console.log("聊天室信息无法获取：",res)
+						return
+					}
+					
+					this.roomInfo = roomInfo
+					
+					//查询好友信息
+					let roomTitle = ""
+					if (roomInfo.type == 1) {
+						//私聊好友数据更新
+						this.friendInfo = this.getFriendInfoByRoomUserListData(roomInfo.users)
+						roomTitle = this.friendInfo.nickname ?? "--"
+					} else if (roomInfo.type == 2) {
+						//群聊
+						roomTitle = roomInfo.title
+					}
+					
+					
+					uni.setNavigationBarTitle({
+						title: roomTitle || "聊天室"
+					})
+					
+				}).catch(err => {
+					console.log(err)
+				})
+				
+				// console.log('查询好友信息---------------0')
+				// //查询好友信息
+				// await userDetail({id: parseInt(option.id||0)}).then(res => {
+				// 	this.friendInfo = res
+				// 	this.friendInfo.id = parseInt(res.id)
+				// 	if (this.friendInfo.id) {
+				// 	}
+				// }).catch(err => {
+				// 	console.log(err)
+				// })
+				
+				//查询群信息
+				console.log('发送消息已读状态---------------1')
+				
+				await getMessageList({
+					page: 1,
+					pageSize: 10000,
+					roomId: this.roomInfo.roomId,
+				}).then(res => {
+					// console.log(res)
+					if (res.list) {
+						this.messageList = res.list
+						this.$forceUpdate(); // 强制组件重新渲染
+					}
+				})
+				
+				//发送消息已读状态
+				console.log('消息设置已读---------------1')
+				await setMessageReadStatus({
+					roomId: parseInt(this.roomInfo.roomId ?? 0),
+				}).then(res => {
+					console.log(res)
+				})
+				
+				
+				this.$nextTick(() => {
+					this.scrollToBottom()
+				})
+			},
+			//通过用户列表获取好友信息
+			getFriendInfoByRoomUserListData(users = []) {
+				for (let i=0; i<users.length; i++) {
+					let user = users[i]
+					if (user.userId && user.userId != this.userInfo.id) {
+						return user
+					}
+				}
+				return []
+			},
 			// 点击发送消息
 			clickSendMessage() {
 				if (this.form.textMessage.lenght <= 0) {
 					console.log('请输入消息')
 					return
 				}
-				//this.showSelfMessage(this.form.textMessage,1)
+				
+				//私聊消息接收人
+				let receiver = parseInt(this.friendInfo.id)
 				
 				//考虑先把消息显示，后续接收到消息后标记为发生成功 TODO
+				// 需要增加前端自定义消息ID，这样能判断服务器回收后的消息ID，这样能判断是否上传成功
+				this.showSelfMessage(this.form.textMessage)
+				console.log("消息准备推送到服务器")
 				let messageJson = JSON.stringify({
-					"type": "text",//目前仅支持text
-					"message_id": 0, //消息ID，可暂时先填空
-					"sender": this.userInfo.id,//暂时使用登录接口是调用的手机号
-					"receiver": 0,//暂时使用对方手机号
-					"group_id": 0,//暂不支持
+					"type": Enum.messageType.normal,//目前仅支持text
+					"receiver": receiver,
+					"roomId": parseInt(this.roomInfo.roomId ?? 0),//暂不支持
 					"content": this.form.textMessage,
 				})
 				uni.sendSocketMessage({
 					data: messageJson
 				});
-				console.log("消息已经推送到服务器")
+				
 					
 				this.form.textMessage = ""
 				
@@ -127,11 +217,15 @@
 			// 显示自己的消息在聊天页面
 			showSelfMessage(content, messageType){
 				this.messageList.push({
-					event: 'message',
 					id: 0,
-					type: 1,
-					senderUserId: this.userInfo.id,
-					content: content
+					type: Enum.messageType.normal,
+					sender: this.userInfo.id,
+					receiver: this.friendInfo.id,
+					content: content,
+					createdAt: getDatetime(),
+				})
+				this.$nextTick(() => {
+					this.scrollToBottom()
 				})
 			},
 			// 显示他人的消息在聊天页面
@@ -149,16 +243,17 @@
 					}
 					let sender = parseInt(messageData.sender)
 					let receiver = parseInt(messageData.receiver)
-					let groupId = parseInt(messageData.groupId)
-					let friendId = this.friendInfo.id
-					console.log(`消息来了，当前聊天框好友ID=${friendId} sender=${sender} receiver=${receiver} groupId=${groupId}`)
-					if (friendId !== sender) {
+					let roomId = parseInt(messageData.roomId)
+					let friendId = this.friendInfo.userId
+					let roomType = messageData.roomInfo.type
+					
+					if (roomId !== this.roomInfo.roomId) {
 						//私聊判断消息是否属于当前页面的用户
 						console.log(`消息来了，但不属于当前聊天室的好友信息，暂不显示，，当前聊天框好友ID=${friendId} sender=${sender} receiver=${receiver} groupId=${groupId}`)
 						return
 					}
 					
-					let messageTypes = ['text', 'entryGroup', 'addFriend', 'userEntry', 'userExit','binary']
+					let messageTypes = [1, 2, 3, 4, 5,6]
 					if (messageTypes.includes(messageData.type)) {
 						console.log("能处理的消息：",messageData)
 						this.messageList.push(messageData)
@@ -176,7 +271,15 @@
 				uni.pageScrollTo({
 					selector: "#viewBottomTag"
 				})
-			}
+			},
+			inputFocus(e) {
+				console.log("inputFocus....",e.detail.height)
+				this.pageBottomHeight = e.detail.height
+			},
+			inputBlur() {
+				console.log("inputBlur....")
+				this.pageBottomHeight = 0
+			},
 		}
 	}
 </script>

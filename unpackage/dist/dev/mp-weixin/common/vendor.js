@@ -9478,9 +9478,196 @@ internalMixin(Vue);
 /* 27 */,
 /* 28 */,
 /* 29 */,
-/* 30 */,
-/* 31 */,
-/* 32 */
+/* 30 */
+/*!********************************************************!*\
+  !*** C:/wwwroot/chat/chat-min-app/helper/websocket.js ***!
+  \********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(uni) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.connectWebSocket = connectWebSocket;
+var _config = __webpack_require__(/*! ./config.js */ 31);
+//缓存KEY
+var KeyReconnections = "wsReconnections"; //重连次数
+var KeyIsCanStart = "wsIsCanStart"; //是否可以连接
+var KeyStatus = "wsStatus"; //ws的连接状态：1-已连接；null-未连接
+
+var websocket;
+var reconnectCount = 0;
+var maxReconnectAttempts = 3;
+var reconnectDelay = 5000; // 5秒重连间隔
+
+function connectWebSocket() {
+  // if (uni.getStorageSync(KeyStatus)) {
+  // 	console.log('websocket 已连接，无需重复连接')
+  // 	return
+  // }
+  console.log('连接 WebSocket...');
+  uni.connectSocket({
+    url: (0, _config.getWebsocketHost)(),
+    header: {
+      'content-type': 'application/json',
+      'token': uni.getStorageSync('token')
+    },
+    method: 'GET',
+    success: function success(res) {},
+    complete: function complete() {
+      addReconnections();
+    }
+  });
+
+  // 连接成功处理
+  uni.onSocketOpen(function (res) {
+    console.log('WebSocket连接已打开！', res);
+    uni.setStorageSync(KeyStatus, 1); //ws连接状态修改：已关闭
+    uni.showToast({
+      title: "ws连接成功",
+      duration: 2000,
+      icon: 'none'
+    });
+    resetReconnections(); // 重置重连计数
+
+    //开始心跳检测
+    //startHeartbeat()
+  });
+
+  // 连接关闭处理
+  uni.onSocketClose(function (res) {
+    uni.showModal({
+      title: '提示',
+      content: 'WebSocket 连接已经断开，是否尝试重新连接？',
+      success: function success(res) {
+        if (res.confirm) {
+          //重连
+          connectWebSocket();
+          console.log('用户点击确定-重新连接');
+        } else if (res.cancel) {
+          console.log('用户点击取消-重新连接');
+          //uni.redirectTo({
+          //	url:'/pages/login/login'
+          //})
+        }
+      }
+    });
+  });
+
+  // 错误处理
+  uni.onSocketError(function (res) {
+    console.log('WebSocket连接打开失败，请检查！', res);
+    uni.showToast({
+      title: "ws错误：" + res.errMsg,
+      duration: 5000,
+      icon: 'none'
+    });
+  });
+}
+
+// 发送心跳消息
+function sendHeartbeat() {
+  console.log('发送心跳消息');
+  uni.sendSocketMessage({
+    data: 'ping'
+  });
+}
+
+// 开始心跳检测
+function startHeartbeat() {
+  setInterval(sendHeartbeat, 5000); // 每5秒发送一次心跳消息
+}
+
+// 获取重连次数
+function getReconnections() {
+  var v = uni.getStorageSync(KeyReconnections);
+  if (v) {
+    return parseInt(v);
+  }
+  return 0;
+}
+
+// 累加重连次数
+function addReconnections() {
+  return uni.setStorageSync(KeyReconnections, getReconnections() + 1);
+}
+
+// 重置重连次数
+function resetReconnections() {
+  return uni.setStorageSync(KeyReconnections, 0);
+}
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
+
+/***/ }),
+/* 31 */
+/*!*****************************************************!*\
+  !*** C:/wwwroot/chat/chat-min-app/helper/config.js ***!
+  \*****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(wx) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getChatApiRequestHost = getChatApiRequestHost;
+exports.getEnv = getEnv;
+exports.getWebsocketHost = getWebsocketHost;
+// 定义版本信息
+var ENV_DEVELOP = "develop"; //开发环境
+var ENV_TEST = "test"; //测试环境
+var ENV_TRIAL = "trial"; //体验版-预发布
+var ENV_RELEASE = "release"; //正式版
+
+// 获取小程序版本：develop-开发版；trial-体验版；release-正式版
+function getEnv() {
+  var _accountInfo$miniProg;
+  var accountInfo = wx.getAccountInfoSync();
+  var env = (_accountInfo$miniProg = accountInfo.miniProgram.envVersion) !== null && _accountInfo$miniProg !== void 0 ? _accountInfo$miniProg : "develop";
+  env = 'develop';
+  return env;
+}
+
+// 获取api请求的host地址
+function getChatApiRequestHost() {
+  var env = getEnv();
+  switch (env) {
+    case ENV_DEVELOP:
+      return "http://127.0.0.1:8081";
+    case ENV_TEST:
+      return "https://lixp.club";
+    case ENV_TRIAL:
+      return "https://lixp.club";
+    case ENV_RELEASE:
+      return "https://lixp.club";
+  }
+}
+// 获取websocket请求的host地址
+function getWebsocketHost() {
+  var env = getEnv();
+  console.log("env=".concat(env));
+  switch (env) {
+    case ENV_DEVELOP:
+      return "ws://127.0.0.1:8081/chat";
+    case ENV_TEST:
+      return "wss://lixp.club/chat";
+    case ENV_TRIAL:
+      return "wss://lixp.club/chat";
+    case ENV_RELEASE:
+      return "wss://lixp.club/chat";
+  }
+}
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/wx.js */ 1)["default"]))
+
+/***/ }),
+/* 32 */,
+/* 33 */,
+/* 34 */
 /*!**********************************************************************************************************!*\
   !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/runtime/componentNormalizer.js ***!
   \**********************************************************************************************************/
@@ -9611,13 +9798,49 @@ function normalizeComponent (
 
 
 /***/ }),
-/* 33 */,
-/* 34 */,
-/* 35 */,
+/* 35 */
+/*!***************************************************!*\
+  !*** C:/wwwroot/chat/chat-min-app/helper/enum.js ***!
+  \***************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Enum = void 0;
+var Enum = {
+  messageType: {
+    normal: 1,
+    entryGroup: 2,
+    addFriend: 3,
+    binary: 4,
+    userEntry: 5,
+    userExit: 6
+  }
+};
+
+// const (
+// 	MessageTypeNormal     = 1 //消息类型-普通文本消息
+// 	MessageTypeEntryGroup = 2 //消息类型-用户加入群聊消息
+// 	MessageTypeAddFriend  = 3 //消息类型-加好友消息
+// 	MessageTypeBinary     = 4 //消息类型-二进制类型
+// 	MessageTypeUserEntry  = 5 //消息类型-用户上线
+// 	MessageTypeUserExit   = 6 //消息类型-用户下线
+// )
+exports.Enum = Enum;
+
+/***/ }),
 /* 36 */,
 /* 37 */,
 /* 38 */,
-/* 39 */
+/* 39 */,
+/* 40 */,
+/* 41 */,
+/* 42 */
 /*!***********************************************!*\
   !*** C:/wwwroot/chat/chat-min-app/api/api.js ***!
   \***********************************************/
@@ -9632,14 +9855,17 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.addFriend = addFriend;
 exports.getFriendContact = getFriendContact;
+exports.getMessageList = getMessageList;
+exports.getRoomList = getRoomList;
 exports.login = login;
 exports.phoneLogin = phoneLogin;
 exports.searchUser = searchUser;
+exports.setMessageReadStatus = setMessageReadStatus;
 exports.uploadFile = uploadFile;
 exports.userDetail = userDetail;
 exports.userInfoSave = userInfoSave;
 exports.wxUserSave = wxUserSave;
-var _request = __webpack_require__(/*! ../helper/request.js */ 40);
+var _request = __webpack_require__(/*! ../helper/request.js */ 43);
 function login(data) {
   return (0, _request.request)({
     api: '/api/im/login',
@@ -9712,9 +9938,33 @@ function getFriendContact(data) {
     data: data
   });
 }
+function getRoomList(data) {
+  return (0, _request.request)({
+    api: '/api/im/getRoomList',
+    method: 'POST',
+    loading: true,
+    data: data
+  });
+}
+function setMessageReadStatus(data) {
+  return (0, _request.request)({
+    api: '/api/im/setMessageReadStatus',
+    method: 'POST',
+    loading: true,
+    data: data
+  });
+}
+function getMessageList(data) {
+  return (0, _request.request)({
+    api: '/api/im/getMessageList',
+    method: 'POST',
+    loading: true,
+    data: data
+  });
+}
 
 /***/ }),
-/* 40 */
+/* 43 */
 /*!******************************************************!*\
   !*** C:/wwwroot/chat/chat-min-app/helper/request.js ***!
   \******************************************************/
@@ -9729,7 +9979,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.request = request;
 exports.uploadSingleFile = uploadSingleFile;
-var _config = __webpack_require__(/*! ./config.js */ 41);
+var _config = __webpack_require__(/*! ./config.js */ 31);
 function request(config) {
   var host = (0, _config.getChatApiRequestHost)();
   var url = host + config.api;
@@ -9766,6 +10016,13 @@ function request(config) {
             duration: 5000,
             icon: 'none'
           });
+          if (code == 401) {
+            console.log('token失效，请重新登录');
+            uni.redirectTo({
+              url: '/pages/login/login'
+            });
+          }
+          return;
         }
         resolve(data);
       },
@@ -9892,72 +10149,6 @@ function uploadSingleFile(config) {
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
 
 /***/ }),
-/* 41 */
-/*!*****************************************************!*\
-  !*** C:/wwwroot/chat/chat-min-app/helper/config.js ***!
-  \*****************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(wx) {
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.getChatApiRequestHost = getChatApiRequestHost;
-exports.getEnv = getEnv;
-exports.getWebsocketHost = getWebsocketHost;
-// 定义版本信息
-var ENV_DEVELOP = "develop"; //开发环境
-var ENV_TEST = "test"; //测试环境
-var ENV_TRIAL = "trial"; //体验版-预发布
-var ENV_RELEASE = "release"; //正式版
-
-// 获取小程序版本：develop-开发版；trial-体验版；release-正式版
-function getEnv() {
-  var _accountInfo$miniProg;
-  var accountInfo = wx.getAccountInfoSync();
-  var env = (_accountInfo$miniProg = accountInfo.miniProgram.envVersion) !== null && _accountInfo$miniProg !== void 0 ? _accountInfo$miniProg : "develop";
-  env = 'develop';
-  return env;
-}
-
-// 获取api请求的host地址
-function getChatApiRequestHost() {
-  var env = getEnv();
-  console.log("env=".concat(env));
-  switch (env) {
-    case ENV_DEVELOP:
-      return "http://127.0.0.1:8081";
-    case ENV_TEST:
-      return "https://lixp.club";
-    case ENV_TRIAL:
-      return "https://lixp.club";
-    case ENV_RELEASE:
-      return "https://lixp.club";
-  }
-}
-// 获取websocket请求的host地址
-function getWebsocketHost() {
-  var env = getEnv();
-  console.log("env=".concat(env));
-  switch (env) {
-    case ENV_DEVELOP:
-      return "ws://127.0.0.1:8081/chat";
-    case ENV_TEST:
-      return "wss://lixp.club/chat";
-    case ENV_TRIAL:
-      return "wss://lixp.club/chat";
-    case ENV_RELEASE:
-      return "wss://lixp.club/chat";
-  }
-}
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/wx.js */ 1)["default"]))
-
-/***/ }),
-/* 42 */,
-/* 43 */,
 /* 44 */,
 /* 45 */,
 /* 46 */,
@@ -9982,7 +10173,52 @@ function getWebsocketHost() {
 /* 65 */,
 /* 66 */,
 /* 67 */,
-/* 68 */,
+/* 68 */
+/*!***************************************************!*\
+  !*** C:/wwwroot/chat/chat-min-app/helper/date.js ***!
+  \***************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.formatDatetime = formatDatetime;
+exports.getDatetime = getDatetime;
+function formatDatetime(dateString) {
+  // 输入的日期字符串
+  // let dateString = "2024-05-01 22:08:43";
+
+  // 分割日期字符串
+  var parts = dateString.split(/[\s:-]/);
+
+  // 创建日期对象
+  var date = new Date(parts[0], parts[1] - 1, parts[2], parts[3], parts[4], parts[5]);
+  return date;
+}
+function getDatetime() {
+  return formatDate(new Date());
+}
+// 格式化时间函数
+function formatDate(date) {
+  var year = date.getFullYear();
+  var month = padZero(date.getMonth() + 1);
+  var day = padZero(date.getDate());
+  var hours = padZero(date.getHours());
+  var minutes = padZero(date.getMinutes());
+  var seconds = padZero(date.getSeconds());
+  return "".concat(year, "-").concat(month, "-").concat(day, " ").concat(hours, ":").concat(minutes, ":").concat(seconds);
+}
+
+// 补零函数，用于补齐小于10的数字
+function padZero(num) {
+  return num < 10 ? '0' + num : num;
+}
+
+/***/ }),
 /* 69 */,
 /* 70 */,
 /* 71 */,
@@ -9991,9 +10227,380 @@ function getWebsocketHost() {
 /* 74 */,
 /* 75 */,
 /* 76 */,
-/* 77 */,
-/* 78 */,
-/* 79 */,
+/* 77 */
+/*!************************************************************************************************!*\
+  !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/@babel/runtime/regenerator/index.js ***!
+  \************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+// TODO(Babel 8): Remove this file.
+
+var runtime = __webpack_require__(/*! @babel/runtime/helpers/regeneratorRuntime */ 78)();
+module.exports = runtime;
+
+/***/ }),
+/* 78 */
+/*!*******************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/regeneratorRuntime.js ***!
+  \*******************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var _typeof = __webpack_require__(/*! ./typeof.js */ 13)["default"];
+function _regeneratorRuntime() {
+  "use strict";
+
+  /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
+  module.exports = _regeneratorRuntime = function _regeneratorRuntime() {
+    return e;
+  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
+  var t,
+    e = {},
+    r = Object.prototype,
+    n = r.hasOwnProperty,
+    o = Object.defineProperty || function (t, e, r) {
+      t[e] = r.value;
+    },
+    i = "function" == typeof Symbol ? Symbol : {},
+    a = i.iterator || "@@iterator",
+    c = i.asyncIterator || "@@asyncIterator",
+    u = i.toStringTag || "@@toStringTag";
+  function define(t, e, r) {
+    return Object.defineProperty(t, e, {
+      value: r,
+      enumerable: !0,
+      configurable: !0,
+      writable: !0
+    }), t[e];
+  }
+  try {
+    define({}, "");
+  } catch (t) {
+    define = function define(t, e, r) {
+      return t[e] = r;
+    };
+  }
+  function wrap(t, e, r, n) {
+    var i = e && e.prototype instanceof Generator ? e : Generator,
+      a = Object.create(i.prototype),
+      c = new Context(n || []);
+    return o(a, "_invoke", {
+      value: makeInvokeMethod(t, r, c)
+    }), a;
+  }
+  function tryCatch(t, e, r) {
+    try {
+      return {
+        type: "normal",
+        arg: t.call(e, r)
+      };
+    } catch (t) {
+      return {
+        type: "throw",
+        arg: t
+      };
+    }
+  }
+  e.wrap = wrap;
+  var h = "suspendedStart",
+    l = "suspendedYield",
+    f = "executing",
+    s = "completed",
+    y = {};
+  function Generator() {}
+  function GeneratorFunction() {}
+  function GeneratorFunctionPrototype() {}
+  var p = {};
+  define(p, a, function () {
+    return this;
+  });
+  var d = Object.getPrototypeOf,
+    v = d && d(d(values([])));
+  v && v !== r && n.call(v, a) && (p = v);
+  var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p);
+  function defineIteratorMethods(t) {
+    ["next", "throw", "return"].forEach(function (e) {
+      define(t, e, function (t) {
+        return this._invoke(e, t);
+      });
+    });
+  }
+  function AsyncIterator(t, e) {
+    function invoke(r, o, i, a) {
+      var c = tryCatch(t[r], t, o);
+      if ("throw" !== c.type) {
+        var u = c.arg,
+          h = u.value;
+        return h && "object" == _typeof(h) && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) {
+          invoke("next", t, i, a);
+        }, function (t) {
+          invoke("throw", t, i, a);
+        }) : e.resolve(h).then(function (t) {
+          u.value = t, i(u);
+        }, function (t) {
+          return invoke("throw", t, i, a);
+        });
+      }
+      a(c.arg);
+    }
+    var r;
+    o(this, "_invoke", {
+      value: function value(t, n) {
+        function callInvokeWithMethodAndArg() {
+          return new e(function (e, r) {
+            invoke(t, n, e, r);
+          });
+        }
+        return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg();
+      }
+    });
+  }
+  function makeInvokeMethod(e, r, n) {
+    var o = h;
+    return function (i, a) {
+      if (o === f) throw new Error("Generator is already running");
+      if (o === s) {
+        if ("throw" === i) throw a;
+        return {
+          value: t,
+          done: !0
+        };
+      }
+      for (n.method = i, n.arg = a;;) {
+        var c = n.delegate;
+        if (c) {
+          var u = maybeInvokeDelegate(c, n);
+          if (u) {
+            if (u === y) continue;
+            return u;
+          }
+        }
+        if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) {
+          if (o === h) throw o = s, n.arg;
+          n.dispatchException(n.arg);
+        } else "return" === n.method && n.abrupt("return", n.arg);
+        o = f;
+        var p = tryCatch(e, r, n);
+        if ("normal" === p.type) {
+          if (o = n.done ? s : l, p.arg === y) continue;
+          return {
+            value: p.arg,
+            done: n.done
+          };
+        }
+        "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg);
+      }
+    };
+  }
+  function maybeInvokeDelegate(e, r) {
+    var n = r.method,
+      o = e.iterator[n];
+    if (o === t) return r.delegate = null, "throw" === n && e.iterator["return"] && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y;
+    var i = tryCatch(o, e.iterator, r.arg);
+    if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y;
+    var a = i.arg;
+    return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y);
+  }
+  function pushTryEntry(t) {
+    var e = {
+      tryLoc: t[0]
+    };
+    1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e);
+  }
+  function resetTryEntry(t) {
+    var e = t.completion || {};
+    e.type = "normal", delete e.arg, t.completion = e;
+  }
+  function Context(t) {
+    this.tryEntries = [{
+      tryLoc: "root"
+    }], t.forEach(pushTryEntry, this), this.reset(!0);
+  }
+  function values(e) {
+    if (e || "" === e) {
+      var r = e[a];
+      if (r) return r.call(e);
+      if ("function" == typeof e.next) return e;
+      if (!isNaN(e.length)) {
+        var o = -1,
+          i = function next() {
+            for (; ++o < e.length;) {
+              if (n.call(e, o)) return next.value = e[o], next.done = !1, next;
+            }
+            return next.value = t, next.done = !0, next;
+          };
+        return i.next = i;
+      }
+    }
+    throw new TypeError(_typeof(e) + " is not iterable");
+  }
+  return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", {
+    value: GeneratorFunctionPrototype,
+    configurable: !0
+  }), o(GeneratorFunctionPrototype, "constructor", {
+    value: GeneratorFunction,
+    configurable: !0
+  }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) {
+    var e = "function" == typeof t && t.constructor;
+    return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name));
+  }, e.mark = function (t) {
+    return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t;
+  }, e.awrap = function (t) {
+    return {
+      __await: t
+    };
+  }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () {
+    return this;
+  }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) {
+    void 0 === i && (i = Promise);
+    var a = new AsyncIterator(wrap(t, r, n, o), i);
+    return e.isGeneratorFunction(r) ? a : a.next().then(function (t) {
+      return t.done ? t.value : a.next();
+    });
+  }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () {
+    return this;
+  }), define(g, "toString", function () {
+    return "[object Generator]";
+  }), e.keys = function (t) {
+    var e = Object(t),
+      r = [];
+    for (var n in e) {
+      r.push(n);
+    }
+    return r.reverse(), function next() {
+      for (; r.length;) {
+        var t = r.pop();
+        if (t in e) return next.value = t, next.done = !1, next;
+      }
+      return next.done = !0, next;
+    };
+  }, e.values = values, Context.prototype = {
+    constructor: Context,
+    reset: function reset(e) {
+      if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = !1, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) {
+        "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t);
+      }
+    },
+    stop: function stop() {
+      this.done = !0;
+      var t = this.tryEntries[0].completion;
+      if ("throw" === t.type) throw t.arg;
+      return this.rval;
+    },
+    dispatchException: function dispatchException(e) {
+      if (this.done) throw e;
+      var r = this;
+      function handle(n, o) {
+        return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o;
+      }
+      for (var o = this.tryEntries.length - 1; o >= 0; --o) {
+        var i = this.tryEntries[o],
+          a = i.completion;
+        if ("root" === i.tryLoc) return handle("end");
+        if (i.tryLoc <= this.prev) {
+          var c = n.call(i, "catchLoc"),
+            u = n.call(i, "finallyLoc");
+          if (c && u) {
+            if (this.prev < i.catchLoc) return handle(i.catchLoc, !0);
+            if (this.prev < i.finallyLoc) return handle(i.finallyLoc);
+          } else if (c) {
+            if (this.prev < i.catchLoc) return handle(i.catchLoc, !0);
+          } else {
+            if (!u) throw new Error("try statement without catch or finally");
+            if (this.prev < i.finallyLoc) return handle(i.finallyLoc);
+          }
+        }
+      }
+    },
+    abrupt: function abrupt(t, e) {
+      for (var r = this.tryEntries.length - 1; r >= 0; --r) {
+        var o = this.tryEntries[r];
+        if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) {
+          var i = o;
+          break;
+        }
+      }
+      i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null);
+      var a = i ? i.completion : {};
+      return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a);
+    },
+    complete: function complete(t, e) {
+      if ("throw" === t.type) throw t.arg;
+      return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y;
+    },
+    finish: function finish(t) {
+      for (var e = this.tryEntries.length - 1; e >= 0; --e) {
+        var r = this.tryEntries[e];
+        if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y;
+      }
+    },
+    "catch": function _catch(t) {
+      for (var e = this.tryEntries.length - 1; e >= 0; --e) {
+        var r = this.tryEntries[e];
+        if (r.tryLoc === t) {
+          var n = r.completion;
+          if ("throw" === n.type) {
+            var o = n.arg;
+            resetTryEntry(r);
+          }
+          return o;
+        }
+      }
+      throw new Error("illegal catch attempt");
+    },
+    delegateYield: function delegateYield(e, r, n) {
+      return this.delegate = {
+        iterator: values(e),
+        resultName: r,
+        nextLoc: n
+      }, "next" === this.method && (this.arg = t), y;
+    }
+  }, e;
+}
+module.exports = _regeneratorRuntime, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+/* 79 */
+/*!*****************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/asyncToGenerator.js ***!
+  \*****************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
+  try {
+    var info = gen[key](arg);
+    var value = info.value;
+  } catch (error) {
+    reject(error);
+    return;
+  }
+  if (info.done) {
+    resolve(value);
+  } else {
+    Promise.resolve(value).then(_next, _throw);
+  }
+}
+function _asyncToGenerator(fn) {
+  return function () {
+    var self = this,
+      args = arguments;
+    return new Promise(function (resolve, reject) {
+      var gen = fn.apply(self, args);
+      function _next(value) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
+      }
+      function _throw(err) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
+      }
+      _next(undefined);
+    });
+  };
+}
+module.exports = _asyncToGenerator, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
 /* 80 */,
 /* 81 */,
 /* 82 */,
@@ -10025,7 +10632,13 @@ function getWebsocketHost() {
 /* 108 */,
 /* 109 */,
 /* 110 */,
-/* 111 */
+/* 111 */,
+/* 112 */,
+/* 113 */,
+/* 114 */,
+/* 115 */,
+/* 116 */,
+/* 117 */
 /*!************************************************************************************!*\
   !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js ***!
   \************************************************************************************/
@@ -10040,20 +10653,20 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 112));
-var _assertThisInitialized2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/assertThisInitialized */ 114));
+var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 77));
+var _assertThisInitialized2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/assertThisInitialized */ 118));
 var _slicedToArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ 5));
 var _typeof2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/typeof */ 13));
 var _toConsumableArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/toConsumableArray */ 18));
-var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 115));
+var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 79));
 var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
-var _inherits2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/inherits */ 116));
-var _possibleConstructorReturn2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/possibleConstructorReturn */ 117));
-var _getPrototypeOf2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/getPrototypeOf */ 118));
-var _wrapNativeSuper2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/wrapNativeSuper */ 119));
+var _inherits2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/inherits */ 119));
+var _possibleConstructorReturn2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/possibleConstructorReturn */ 120));
+var _getPrototypeOf2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/getPrototypeOf */ 121));
+var _wrapNativeSuper2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/wrapNativeSuper */ 122));
 var _classCallCheck2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/classCallCheck */ 23));
 var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/createClass */ 24));
-var _pages = _interopRequireDefault(__webpack_require__(/*! @/pages.json */ 121));
+var _pages = _interopRequireDefault(__webpack_require__(/*! @/pages.json */ 124));
 function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e34) { throw _e34; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e35) { didErr = true; err = _e35; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
@@ -10506,7 +11119,7 @@ var S = "development" === "development",
   x = true;
 var O = "";
 try {
-  O = (__webpack_require__(/*! uni-stat-config */ 122).default || __webpack_require__(/*! uni-stat-config */ 122)).appid;
+  O = (__webpack_require__(/*! uni-stat-config */ 125).default || __webpack_require__(/*! uni-stat-config */ 125)).appid;
 } catch (e) {}
 var E = {};
 function L(e) {
@@ -17849,341 +18462,7 @@ exports.default = Bs;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../webpack/buildin/global.js */ 3), __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/wx.js */ 1)["default"]))
 
 /***/ }),
-/* 112 */
-/*!************************************************************************************************!*\
-  !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/@babel/runtime/regenerator/index.js ***!
-  \************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-// TODO(Babel 8): Remove this file.
-
-var runtime = __webpack_require__(/*! @babel/runtime/helpers/regeneratorRuntime */ 113)();
-module.exports = runtime;
-
-/***/ }),
-/* 113 */
-/*!*******************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/regeneratorRuntime.js ***!
-  \*******************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-var _typeof = __webpack_require__(/*! ./typeof.js */ 13)["default"];
-function _regeneratorRuntime() {
-  "use strict";
-
-  /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
-  module.exports = _regeneratorRuntime = function _regeneratorRuntime() {
-    return e;
-  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
-  var t,
-    e = {},
-    r = Object.prototype,
-    n = r.hasOwnProperty,
-    o = Object.defineProperty || function (t, e, r) {
-      t[e] = r.value;
-    },
-    i = "function" == typeof Symbol ? Symbol : {},
-    a = i.iterator || "@@iterator",
-    c = i.asyncIterator || "@@asyncIterator",
-    u = i.toStringTag || "@@toStringTag";
-  function define(t, e, r) {
-    return Object.defineProperty(t, e, {
-      value: r,
-      enumerable: !0,
-      configurable: !0,
-      writable: !0
-    }), t[e];
-  }
-  try {
-    define({}, "");
-  } catch (t) {
-    define = function define(t, e, r) {
-      return t[e] = r;
-    };
-  }
-  function wrap(t, e, r, n) {
-    var i = e && e.prototype instanceof Generator ? e : Generator,
-      a = Object.create(i.prototype),
-      c = new Context(n || []);
-    return o(a, "_invoke", {
-      value: makeInvokeMethod(t, r, c)
-    }), a;
-  }
-  function tryCatch(t, e, r) {
-    try {
-      return {
-        type: "normal",
-        arg: t.call(e, r)
-      };
-    } catch (t) {
-      return {
-        type: "throw",
-        arg: t
-      };
-    }
-  }
-  e.wrap = wrap;
-  var h = "suspendedStart",
-    l = "suspendedYield",
-    f = "executing",
-    s = "completed",
-    y = {};
-  function Generator() {}
-  function GeneratorFunction() {}
-  function GeneratorFunctionPrototype() {}
-  var p = {};
-  define(p, a, function () {
-    return this;
-  });
-  var d = Object.getPrototypeOf,
-    v = d && d(d(values([])));
-  v && v !== r && n.call(v, a) && (p = v);
-  var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p);
-  function defineIteratorMethods(t) {
-    ["next", "throw", "return"].forEach(function (e) {
-      define(t, e, function (t) {
-        return this._invoke(e, t);
-      });
-    });
-  }
-  function AsyncIterator(t, e) {
-    function invoke(r, o, i, a) {
-      var c = tryCatch(t[r], t, o);
-      if ("throw" !== c.type) {
-        var u = c.arg,
-          h = u.value;
-        return h && "object" == _typeof(h) && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) {
-          invoke("next", t, i, a);
-        }, function (t) {
-          invoke("throw", t, i, a);
-        }) : e.resolve(h).then(function (t) {
-          u.value = t, i(u);
-        }, function (t) {
-          return invoke("throw", t, i, a);
-        });
-      }
-      a(c.arg);
-    }
-    var r;
-    o(this, "_invoke", {
-      value: function value(t, n) {
-        function callInvokeWithMethodAndArg() {
-          return new e(function (e, r) {
-            invoke(t, n, e, r);
-          });
-        }
-        return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg();
-      }
-    });
-  }
-  function makeInvokeMethod(e, r, n) {
-    var o = h;
-    return function (i, a) {
-      if (o === f) throw new Error("Generator is already running");
-      if (o === s) {
-        if ("throw" === i) throw a;
-        return {
-          value: t,
-          done: !0
-        };
-      }
-      for (n.method = i, n.arg = a;;) {
-        var c = n.delegate;
-        if (c) {
-          var u = maybeInvokeDelegate(c, n);
-          if (u) {
-            if (u === y) continue;
-            return u;
-          }
-        }
-        if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) {
-          if (o === h) throw o = s, n.arg;
-          n.dispatchException(n.arg);
-        } else "return" === n.method && n.abrupt("return", n.arg);
-        o = f;
-        var p = tryCatch(e, r, n);
-        if ("normal" === p.type) {
-          if (o = n.done ? s : l, p.arg === y) continue;
-          return {
-            value: p.arg,
-            done: n.done
-          };
-        }
-        "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg);
-      }
-    };
-  }
-  function maybeInvokeDelegate(e, r) {
-    var n = r.method,
-      o = e.iterator[n];
-    if (o === t) return r.delegate = null, "throw" === n && e.iterator["return"] && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y;
-    var i = tryCatch(o, e.iterator, r.arg);
-    if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y;
-    var a = i.arg;
-    return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y);
-  }
-  function pushTryEntry(t) {
-    var e = {
-      tryLoc: t[0]
-    };
-    1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e);
-  }
-  function resetTryEntry(t) {
-    var e = t.completion || {};
-    e.type = "normal", delete e.arg, t.completion = e;
-  }
-  function Context(t) {
-    this.tryEntries = [{
-      tryLoc: "root"
-    }], t.forEach(pushTryEntry, this), this.reset(!0);
-  }
-  function values(e) {
-    if (e || "" === e) {
-      var r = e[a];
-      if (r) return r.call(e);
-      if ("function" == typeof e.next) return e;
-      if (!isNaN(e.length)) {
-        var o = -1,
-          i = function next() {
-            for (; ++o < e.length;) {
-              if (n.call(e, o)) return next.value = e[o], next.done = !1, next;
-            }
-            return next.value = t, next.done = !0, next;
-          };
-        return i.next = i;
-      }
-    }
-    throw new TypeError(_typeof(e) + " is not iterable");
-  }
-  return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", {
-    value: GeneratorFunctionPrototype,
-    configurable: !0
-  }), o(GeneratorFunctionPrototype, "constructor", {
-    value: GeneratorFunction,
-    configurable: !0
-  }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) {
-    var e = "function" == typeof t && t.constructor;
-    return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name));
-  }, e.mark = function (t) {
-    return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t;
-  }, e.awrap = function (t) {
-    return {
-      __await: t
-    };
-  }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () {
-    return this;
-  }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) {
-    void 0 === i && (i = Promise);
-    var a = new AsyncIterator(wrap(t, r, n, o), i);
-    return e.isGeneratorFunction(r) ? a : a.next().then(function (t) {
-      return t.done ? t.value : a.next();
-    });
-  }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () {
-    return this;
-  }), define(g, "toString", function () {
-    return "[object Generator]";
-  }), e.keys = function (t) {
-    var e = Object(t),
-      r = [];
-    for (var n in e) {
-      r.push(n);
-    }
-    return r.reverse(), function next() {
-      for (; r.length;) {
-        var t = r.pop();
-        if (t in e) return next.value = t, next.done = !1, next;
-      }
-      return next.done = !0, next;
-    };
-  }, e.values = values, Context.prototype = {
-    constructor: Context,
-    reset: function reset(e) {
-      if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = !1, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) {
-        "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t);
-      }
-    },
-    stop: function stop() {
-      this.done = !0;
-      var t = this.tryEntries[0].completion;
-      if ("throw" === t.type) throw t.arg;
-      return this.rval;
-    },
-    dispatchException: function dispatchException(e) {
-      if (this.done) throw e;
-      var r = this;
-      function handle(n, o) {
-        return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o;
-      }
-      for (var o = this.tryEntries.length - 1; o >= 0; --o) {
-        var i = this.tryEntries[o],
-          a = i.completion;
-        if ("root" === i.tryLoc) return handle("end");
-        if (i.tryLoc <= this.prev) {
-          var c = n.call(i, "catchLoc"),
-            u = n.call(i, "finallyLoc");
-          if (c && u) {
-            if (this.prev < i.catchLoc) return handle(i.catchLoc, !0);
-            if (this.prev < i.finallyLoc) return handle(i.finallyLoc);
-          } else if (c) {
-            if (this.prev < i.catchLoc) return handle(i.catchLoc, !0);
-          } else {
-            if (!u) throw new Error("try statement without catch or finally");
-            if (this.prev < i.finallyLoc) return handle(i.finallyLoc);
-          }
-        }
-      }
-    },
-    abrupt: function abrupt(t, e) {
-      for (var r = this.tryEntries.length - 1; r >= 0; --r) {
-        var o = this.tryEntries[r];
-        if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) {
-          var i = o;
-          break;
-        }
-      }
-      i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null);
-      var a = i ? i.completion : {};
-      return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a);
-    },
-    complete: function complete(t, e) {
-      if ("throw" === t.type) throw t.arg;
-      return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y;
-    },
-    finish: function finish(t) {
-      for (var e = this.tryEntries.length - 1; e >= 0; --e) {
-        var r = this.tryEntries[e];
-        if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y;
-      }
-    },
-    "catch": function _catch(t) {
-      for (var e = this.tryEntries.length - 1; e >= 0; --e) {
-        var r = this.tryEntries[e];
-        if (r.tryLoc === t) {
-          var n = r.completion;
-          if ("throw" === n.type) {
-            var o = n.arg;
-            resetTryEntry(r);
-          }
-          return o;
-        }
-      }
-      throw new Error("illegal catch attempt");
-    },
-    delegateYield: function delegateYield(e, r, n) {
-      return this.delegate = {
-        iterator: values(e),
-        resultName: r,
-        nextLoc: n
-      }, "next" === this.method && (this.arg = t), y;
-    }
-  }, e;
-}
-module.exports = _regeneratorRuntime, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-/* 114 */
+/* 118 */
 /*!**********************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/assertThisInitialized.js ***!
   \**********************************************************************/
@@ -18199,47 +18478,7 @@ function _assertThisInitialized(self) {
 module.exports = _assertThisInitialized, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
-/* 115 */
-/*!*****************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/asyncToGenerator.js ***!
-  \*****************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
-  try {
-    var info = gen[key](arg);
-    var value = info.value;
-  } catch (error) {
-    reject(error);
-    return;
-  }
-  if (info.done) {
-    resolve(value);
-  } else {
-    Promise.resolve(value).then(_next, _throw);
-  }
-}
-function _asyncToGenerator(fn) {
-  return function () {
-    var self = this,
-      args = arguments;
-    return new Promise(function (resolve, reject) {
-      var gen = fn.apply(self, args);
-      function _next(value) {
-        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
-      }
-      function _throw(err) {
-        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
-      }
-      _next(undefined);
-    });
-  };
-}
-module.exports = _asyncToGenerator, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-/* 116 */
+/* 119 */
 /*!*********************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/inherits.js ***!
   \*********************************************************/
@@ -18266,7 +18505,7 @@ function _inherits(subClass, superClass) {
 module.exports = _inherits, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
-/* 117 */
+/* 120 */
 /*!**************************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/possibleConstructorReturn.js ***!
   \**************************************************************************/
@@ -18274,7 +18513,7 @@ module.exports = _inherits, module.exports.__esModule = true, module.exports["de
 /***/ (function(module, exports, __webpack_require__) {
 
 var _typeof = __webpack_require__(/*! ./typeof.js */ 13)["default"];
-var assertThisInitialized = __webpack_require__(/*! ./assertThisInitialized.js */ 114);
+var assertThisInitialized = __webpack_require__(/*! ./assertThisInitialized.js */ 118);
 function _possibleConstructorReturn(self, call) {
   if (call && (_typeof(call) === "object" || typeof call === "function")) {
     return call;
@@ -18286,7 +18525,7 @@ function _possibleConstructorReturn(self, call) {
 module.exports = _possibleConstructorReturn, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
-/* 118 */
+/* 121 */
 /*!***************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/getPrototypeOf.js ***!
   \***************************************************************/
@@ -18302,16 +18541,16 @@ function _getPrototypeOf(o) {
 module.exports = _getPrototypeOf, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
-/* 119 */
+/* 122 */
 /*!****************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/wrapNativeSuper.js ***!
   \****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-var getPrototypeOf = __webpack_require__(/*! ./getPrototypeOf.js */ 118);
+var getPrototypeOf = __webpack_require__(/*! ./getPrototypeOf.js */ 121);
 var setPrototypeOf = __webpack_require__(/*! ./setPrototypeOf.js */ 16);
-var isNativeFunction = __webpack_require__(/*! ./isNativeFunction.js */ 120);
+var isNativeFunction = __webpack_require__(/*! ./isNativeFunction.js */ 123);
 var construct = __webpack_require__(/*! ./construct.js */ 15);
 function _wrapNativeSuper(Class) {
   var _cache = typeof Map === "function" ? new Map() : undefined;
@@ -18342,7 +18581,7 @@ function _wrapNativeSuper(Class) {
 module.exports = _wrapNativeSuper, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
-/* 120 */
+/* 123 */
 /*!*****************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/isNativeFunction.js ***!
   \*****************************************************************/
@@ -18359,7 +18598,7 @@ function _isNativeFunction(fn) {
 module.exports = _isNativeFunction, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
-/* 121 */
+/* 124 */
 /*!****************************************************************************!*\
   !*** C:/wwwroot/chat/chat-min-app/pages.json?{"type":"origin-pages-json"} ***!
   \****************************************************************************/
@@ -18441,7 +18680,7 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 122 */
+/* 125 */
 /*!***************************************************************!*\
   !*** C:/wwwroot/chat/chat-min-app/pages.json?{"type":"stat"} ***!
   \***************************************************************/
@@ -18461,14 +18700,14 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 123 */,
-/* 124 */,
-/* 125 */,
 /* 126 */,
 /* 127 */,
 /* 128 */,
 /* 129 */,
-/* 130 */
+/* 130 */,
+/* 131 */,
+/* 132 */,
+/* 133 */
 /*!*******************************************************************************************************!*\
   !*** C:/wwwroot/chat/chat-min-app/uni_modules/uni-search-bar/components/uni-search-bar/i18n/index.js ***!
   \*******************************************************************************************************/
@@ -18483,9 +18722,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _en = _interopRequireDefault(__webpack_require__(/*! ./en.json */ 131));
-var _zhHans = _interopRequireDefault(__webpack_require__(/*! ./zh-Hans.json */ 132));
-var _zhHant = _interopRequireDefault(__webpack_require__(/*! ./zh-Hant.json */ 133));
+var _en = _interopRequireDefault(__webpack_require__(/*! ./en.json */ 134));
+var _zhHans = _interopRequireDefault(__webpack_require__(/*! ./zh-Hans.json */ 135));
+var _zhHant = _interopRequireDefault(__webpack_require__(/*! ./zh-Hant.json */ 136));
 var _default = {
   en: _en.default,
   'zh-Hans': _zhHans.default,
@@ -18494,7 +18733,7 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 131 */
+/* 134 */
 /*!******************************************************************************************************!*\
   !*** C:/wwwroot/chat/chat-min-app/uni_modules/uni-search-bar/components/uni-search-bar/i18n/en.json ***!
   \******************************************************************************************************/
@@ -18504,7 +18743,7 @@ exports.default = _default;
 module.exports = JSON.parse("{\"uni-search-bar.cancel\":\"cancel\",\"uni-search-bar.placeholder\":\"Search enter content\"}");
 
 /***/ }),
-/* 132 */
+/* 135 */
 /*!***********************************************************************************************************!*\
   !*** C:/wwwroot/chat/chat-min-app/uni_modules/uni-search-bar/components/uni-search-bar/i18n/zh-Hans.json ***!
   \***********************************************************************************************************/
@@ -18514,7 +18753,7 @@ module.exports = JSON.parse("{\"uni-search-bar.cancel\":\"cancel\",\"uni-search-
 module.exports = JSON.parse("{\"uni-search-bar.cancel\":\"cancel\",\"uni-search-bar.placeholder\":\"请输入搜索内容\"}");
 
 /***/ }),
-/* 133 */
+/* 136 */
 /*!***********************************************************************************************************!*\
   !*** C:/wwwroot/chat/chat-min-app/uni_modules/uni-search-bar/components/uni-search-bar/i18n/zh-Hant.json ***!
   \***********************************************************************************************************/
@@ -18524,14 +18763,14 @@ module.exports = JSON.parse("{\"uni-search-bar.cancel\":\"cancel\",\"uni-search-
 module.exports = JSON.parse("{\"uni-search-bar.cancel\":\"cancel\",\"uni-search-bar.placeholder\":\"請輸入搜索內容\"}");
 
 /***/ }),
-/* 134 */,
-/* 135 */,
-/* 136 */,
 /* 137 */,
 /* 138 */,
 /* 139 */,
 /* 140 */,
-/* 141 */
+/* 141 */,
+/* 142 */,
+/* 143 */,
+/* 144 */
 /*!****************************************************************************************!*\
   !*** C:/wwwroot/chat/chat-min-app/uni_modules/uni-icons/components/uni-icons/icons.js ***!
   \****************************************************************************************/
@@ -19550,185 +19789,6 @@ var _default = {
   }]
 };
 exports.default = _default;
-
-/***/ }),
-/* 142 */,
-/* 143 */,
-/* 144 */,
-/* 145 */,
-/* 146 */,
-/* 147 */,
-/* 148 */,
-/* 149 */,
-/* 150 */,
-/* 151 */,
-/* 152 */,
-/* 153 */,
-/* 154 */,
-/* 155 */,
-/* 156 */,
-/* 157 */,
-/* 158 */,
-/* 159 */,
-/* 160 */,
-/* 161 */,
-/* 162 */,
-/* 163 */,
-/* 164 */,
-/* 165 */
-/*!********************************************************!*\
-  !*** C:/wwwroot/chat/chat-min-app/helper/websocket.js ***!
-  \********************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(uni) {
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.checkWebsocketStatus = checkWebsocketStatus;
-exports.closeWebsocket = closeWebsocket;
-exports.initWebscoket = initWebscoket;
-exports.isCanConnectionWebsocket = isCanConnectionWebsocket;
-exports.setStoopConnectionWebsocket = setStoopConnectionWebsocket;
-var _config = __webpack_require__(/*! ./config.js */ 41);
-//缓存KEY
-var KeyReconnections = "wsReconnections"; //重连次数
-var KeyIsCanStart = "wsIsCanStart"; //是否可以连接
-var KeyStatus = "wsStatus"; //ws的连接状态：1-已连接；null-未连接
-
-function checkWebsocketStatus() {
-  console.log("checkWebsocketStatus");
-  setInterval(function () {
-    initWebscoket();
-  }, 5 * 1000);
-}
-
-// 初始化websocket
-function initWebscoket() {
-  console.log("初始化websocket...");
-
-  //连接ws
-  connection();
-  uni.onSocketOpen(function (res) {
-    console.log('WebSocket连接已打开！', res);
-    uni.showToast({
-      title: "ws连接成功",
-      duration: 2000,
-      icon: 'none'
-    });
-  });
-  uni.onSocketError(function (res) {
-    console.log('WebSocket连接打开失败，请检查！', res);
-    uni.showToast({
-      title: "ws错误：" + res.errMsg,
-      duration: 5000,
-      icon: 'none'
-    });
-  });
-  var _this = this;
-  // uni.onSocketMessage(function (res) {
-  //   console.log('websocket.js收到服务器内容：' + res.data);
-  //   // _this.handleWebsocketData(res.data)
-  // })
-
-  uni.onSocketClose(function (res) {
-    console.log('WebSocket 已关闭！');
-    uni.removeStorageSync(KeyStatus);
-    uni.showToast({
-      title: "ws已端口连接：" + res.errMsg,
-      duration: 5000,
-      icon: 'none'
-    });
-  });
-}
-
-// 连接websocket
-function connection() {
-  if (isCanStartWebsocket() != 1) {
-    console.log("暂不允许连接websocket......");
-    return;
-  }
-  if (uni.getStorageSync(KeyStatus)) {
-    console.log("websocket已连接，无需重复连接");
-    return;
-  }
-  if (getWebReconnections() > 3) {
-    uni.showModal({
-      title: '提示',
-      content: '服务已断开连接，是否重新连接？',
-      success: function success(res) {
-        if (res.confirm) {
-          resetWebReconnections();
-
-          //重连
-          connection();
-          console.log('用户点击确定-重新连接');
-        } else if (res.cancel) {
-          console.log('用户点击取消-重新连接');
-        }
-      }
-    });
-    return;
-  }
-
-  //稍等一下
-  setTimeout(function () {}, 2000);
-  uni.connectSocket({
-    url: (0, _config.getWebsocketHost)(),
-    header: {
-      'content-type': 'application/json',
-      'token': uni.getStorageSync('token')
-    },
-    method: 'GET',
-    success: function success(res) {
-      uni.setStorageSync(KeyStatus, "1");
-    }
-  });
-  addWebReconnections();
-}
-
-// 设置不允许websocket连接
-function setStoopConnectionWebsocket() {
-  return uni.removeStorageSync(KeyIsCanStart);
-}
-
-// 关闭连接
-function closeWebsocket() {
-  uni.removeStorageSync(KeyStatus);
-}
-
-// 开启连接
-function isCanConnectionWebsocket() {
-  uni.setStorageSync(KeyIsCanStart, 1);
-}
-
-// 是否可以连接websocket
-function isCanStartWebsocket() {
-  var _uni$getStorageSync;
-  var token = (_uni$getStorageSync = uni.getStorageSync("token")) !== null && _uni$getStorageSync !== void 0 ? _uni$getStorageSync : '';
-  return token && token.length > 0 ? 1 : 0;
-  //return uni.getStorageSync(KeyIsCanStart) ?? 0
-}
-
-// 获取重连次数
-function getWebReconnections() {
-  var _uni$getStorageSync2;
-  return parseInt((_uni$getStorageSync2 = uni.getStorageSync(KeyReconnections)) !== null && _uni$getStorageSync2 !== void 0 ? _uni$getStorageSync2 : 0);
-}
-
-// 累加重连次数
-function addWebReconnections() {
-  return uni.setStorageSync(KeyReconnections, getWebReconnections() + 1);
-}
-
-// 重置重连次数
-function resetWebReconnections() {
-  return uni.setStorageSync(KeyReconnections, 0);
-}
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
 
 /***/ })
 ]]);

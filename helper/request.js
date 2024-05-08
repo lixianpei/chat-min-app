@@ -31,6 +31,13 @@ export function request(config) {
 						duration: 5000,
 						icon:'none'
 					})
+					if (code == 401) {
+						console.log('token失效，请重新登录')
+						uni.redirectTo({
+							url:'/pages/login/login'
+						})
+					}
+					return
 				}
 				
 				resolve(data);

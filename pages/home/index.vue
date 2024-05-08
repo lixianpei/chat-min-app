@@ -1,12 +1,12 @@
 <template>
 	<view class="container">
 		<view class="info">
-			<image class="avatar" :src="userInfo.avatar"></image>
+			<image class="avatar" :src="userInfo.avatarUrl"></image>
 			<view class="right">
 				<view class="base">
-					<text class="remark_username">{{userInfo.remark_username}}</text>
+					<text class="remark_username">{{userInfo.nickname}}</text>
 				</view>
-				<view class="item">聊天号：{{userInfo.user_no||"-"}}</view>
+				<view class="item">聊天ID：{{userInfo.id||"-"}}</view>
 				<view class="item">手机号：{{userInfo.phone||"-"}}</view>
 				<view class="item"></view>
 			</view>
@@ -38,27 +38,32 @@
 </template>
 
 <script>
+	import { userDetail } from '../../api/api'
 	export default {
 		data() {
 			return {
-				userInfo: {						
-					uid: 1,
-					phone: "17859908727",
-					remark_username: "Ac",
-					username: "赵双岑",
-					nickname: "Super笔中情",
-					user_no: "superupzhaoshaungcen",
-					address: "福建省厦门市",
-					avatar: "https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/unicloudlogo.png",
-					gender: 1,//男-1；女-2；
-					isStar: 1,//是否标星
-					isFriend: 0,//是否好友
-					searchSource: "来自手机号搜索",//好友推荐、其他等等
-				}
+				userInfo: uni.getStorageInfoSync("userInfo")
+				// userInfo: {						
+				// 	uid: 1,
+				// 	phone: "17859908727",
+				// 	remark_username: "Ac",
+				// 	username: "赵双岑",
+				// 	nickname: "Super笔中情",
+				// 	user_no: "superupzhaoshaungcen",
+				// 	address: "福建省厦门市",
+				// 	avatar: "https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/unicloudlogo.png",
+				// 	gender: 1,//男-1；女-2；
+				// 	isStar: 1,//是否标星
+				// 	isFriend: 0,//是否好友
+				// 	searchSource: "来自手机号搜索",//好友推荐、其他等等
+				// }
 			}
 		},
 		onLoad(option) {
 			console.log("detail:",option)
+			userDetail({id: parseInt(uni.getStorageSync("user_id"))}).then(res => {
+				this.userInfo = res
+			})
 		},
 		methods: {
 			addContactUser() {

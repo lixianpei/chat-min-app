@@ -1,21 +1,20 @@
 <script>
-	import { checkWebsocketStatus,closeWebsocket } from './helper/websocket'
+	import { connectWebSocket } from './helper/websocket'
 	export default {
 		globalData: {
-			isCanStartWebsocket: false,//是否启动ws
+			websocket: null,//是否启动ws
 		},
 		onLaunch: function() {
 			console.warn('当前组件仅支持 uni_modules 目录结构 ，请升级 HBuilderX 到 3.1.0 版本以上！')
 			console.log('App Launch')
 		},
 		onShow: function() {
-			console.log('App Show')
-			console.log("App....")
-			closeWebsocket()
-			checkWebsocketStatus()
+			
 		},
 		onHide: function() {
 			console.log('App Hide')
+		},
+		methods: {
 		}
 	}
 </script>

@@ -17,7 +17,7 @@
 		<view class="menu-list">
 			<template v-for="(contact,index) in contactList">
 				<view class="item" @click="enterChat(contact)" :key="index">
-					<image class="cover" :src="contact.avatar"></image>
+					<image class="cover" :src="contact.avatar_url"></image>
 					<view class="name">{{contact.nickname||"EmptyNickname"}}</view>
 				</view>
 			</template>

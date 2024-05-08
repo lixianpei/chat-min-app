@@ -48,6 +48,7 @@ login-button.data-v-b237504c:active {
 	width: 100rpx;
 	height: 100rpx;
 	border-radius: 50%;
+	background-color: #1aad19;
 }
 .avatar-button.data-v-b237504c {
 	background: none !important; /* 移除按钮默认的背景色 */

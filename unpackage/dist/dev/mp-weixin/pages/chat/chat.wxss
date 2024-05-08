@@ -5,6 +5,7 @@
   background-color: #ededed;
   padding: 20rpx;
   padding-bottom: 120rpx;
+  position: relative;
 }
 .message-list.data-v-bf16e7f4 {
   display: flex;
@@ -14,6 +15,7 @@
   display: flex;
   align-items: flex-start;
   margin-bottom: 30rpx;
+  word-break: break-word;
 }
 .message-list .message-box .head-portrait.data-v-bf16e7f4 {
   width: 80rpx;
@@ -90,7 +92,7 @@
   /* 箭头颜色和位置 */
 }
 .bottom-operation-tabbar.data-v-bf16e7f4 {
-  position: fixed;
+  position: absolute;
   bottom: 0;
   left: 0;
   padding: 20rpx;
@@ -98,6 +100,8 @@
   background-color: #f7f7f7;
   width: 100vw;
   box-sizing: border-box;
+  z-index: 99;
+  flex-shrink: 0;
 }
 .bottom-operation-tabbar .tabbar-list.data-v-bf16e7f4 {
   display: flex;

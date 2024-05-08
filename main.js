@@ -3,6 +3,14 @@
 import Vue from 'vue'
 import App from './App'
 
+import * as enums from 'helper/enum.js'
+const EnumPlugin = {
+  install(Vue) {
+    Vue.prototype.$enums = enums;
+  }
+};
+Vue.use(EnumPlugin)
+
 Vue.config.productionTip = false
 
 App.mpType = 'app'

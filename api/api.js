@@ -82,3 +82,30 @@ export function getFriendContact(data) {
 		data: data
 	});
 }
+
+export function getRoomList(data) {
+	return request({
+		api: '/api/im/getRoomList',
+		method: 'POST',
+		loading: true,
+		data: data
+	});
+}
+
+export function setMessageReadStatus(data) {
+	return request({
+		api: '/api/im/setMessageReadStatus',
+		method: 'POST',
+		loading: true,
+		data: data
+	});
+}
+
+export function getMessageList(data) {
+	return request({
+		api: '/api/im/getMessageList',
+		method: 'POST',
+		loading: true,
+		data: data
+	})
+}

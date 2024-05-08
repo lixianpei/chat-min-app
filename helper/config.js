@@ -15,7 +15,6 @@ export function getEnv() {
 // 获取api请求的host地址
 export function getChatApiRequestHost() {
 	let env = getEnv()
-	console.log(`env=${env}`)
 	switch(env) {
 		case ENV_DEVELOP:
 			return "http://127.0.0.1:8081"
