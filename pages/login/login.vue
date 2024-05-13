@@ -148,7 +148,12 @@ export default {
 			let avatar = e.detail.avatarUrl ?? ''
 
 			//获取到微信头像后马上下载到本地，随后上传到服务器
-			uploadFile(avatar).then(res => {
+			uploadFile({
+				filepath: avatar,
+				formData: {
+					subject: "avatar"
+				}
+			}).then(res => {
 				console.log("uploadFileOk:", res)
 				//设置本地头像信息
 				this.avatarUrl = res.url

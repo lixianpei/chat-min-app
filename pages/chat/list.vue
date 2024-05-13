@@ -124,16 +124,18 @@
 				
 				//消息类型
 				switch(messageType) {
-					case Enum.messageType.normal:
+					case Enum.messageType.text:
 						messageContent = message.content
 						break
-					case Enum.messageType.addFriend:
-						uni.showToast({
-							title: message.content,
-							duration: 3000,
-							icon:'none'
-						})
-						return
+					case Enum.messageType.image:
+						messageContent = '[图片]'
+						break
+					case Enum.messageType.audio:
+						messageContent = '[语音]'
+						break
+					case Enum.messageType.audio:
+						messageContent = '[视频]'
+						break
 					default:
 						consoel.log("不能处理的消息：",message)
 						return

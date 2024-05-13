@@ -53,14 +53,18 @@
   font-size: 24rpx;
   color: #666;
 }
-.self-message-text.data-v-bf16e7f4 {
+.self-message.data-v-bf16e7f4 {
   position: relative;
   background: #89d961;
   padding: 20rpx;
   margin: 0 10rpx 0 90rpx;
   border-radius: 8rpx;
 }
-.self-message-text.data-v-bf16e7f4::after {
+.self-message .text.data-v-bf16e7f4 {
+  color: black;
+  background-color: #89d961 !important;
+}
+.self-message.data-v-bf16e7f4::after {
   content: '';
   position: absolute;
   top: 20rpx;
@@ -72,14 +76,14 @@
   border-color: transparent transparent transparent #89d961;
   /* 箭头颜色和位置 */
 }
-.other-message-text.data-v-bf16e7f4 {
+.other-message.data-v-bf16e7f4 {
   position: relative;
   background: white;
   padding: 20rpx;
   margin: 0 90rpx 0 10rpx;
   border-radius: 8rpx;
 }
-.other-message-text.data-v-bf16e7f4::after {
+.other-message.data-v-bf16e7f4::after {
   content: '';
   position: absolute;
   top: 20rpx;
@@ -91,11 +95,20 @@
   border-color: transparent white transparent transparent;
   /* 箭头颜色和位置 */
 }
+.message-type-2.data-v-bf16e7f4 {
+  background-color: white;
+  border: 1rpx solid #f7f7f7;
+  padding: unset;
+  border-radius: unset;
+}
+.message-type-2.data-v-bf16e7f4::after {
+  content: unset;
+}
 .bottom-operation-tabbar.data-v-bf16e7f4 {
   position: absolute;
   bottom: 0;
   left: 0;
-  padding: 20rpx;
+  padding: 25rpx 0;
   border-top: 2rpx solid #d8d8d8;
   background-color: #f7f7f7;
   width: 100vw;
@@ -107,16 +120,26 @@
   display: flex;
   flex-direction: row;
   align-items: flex-end;
+  justify-content: space-between;
   width: 100%;
+}
+.bottom-operation-tabbar .tabbar-list .icon.data-v-bf16e7f4 {
+  width: 45rpx;
+  height: 45rpx;
+  color: black;
+  flex-shrink: 0;
+}
+.bottom-operation-tabbar .tabbar-list .item.data-v-bf16e7f4 {
+  margin: 0 10rpx;
 }
 .bottom-operation-tabbar .tabbar-list .message-input.data-v-bf16e7f4 {
   background-color: white;
   padding: 10rpx;
   border-radius: 10rpx;
   max-height: 20vh;
+  width: 80%;
 }
 .bottom-operation-tabbar .tabbar-list .message-send.data-v-bf16e7f4 {
   flex-shrink: 0;
-  margin-left: 20rpx;
 }
 

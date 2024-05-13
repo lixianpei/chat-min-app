@@ -9629,7 +9629,8 @@ function getEnv() {
   var _accountInfo$miniProg;
   var accountInfo = wx.getAccountInfoSync();
   var env = (_accountInfo$miniProg = accountInfo.miniProgram.envVersion) !== null && _accountInfo$miniProg !== void 0 ? _accountInfo$miniProg : "develop";
-  env = 'develop';
+  // env = 'develop'
+  env = 'test';
   return env;
 }
 
@@ -9814,22 +9815,20 @@ Object.defineProperty(exports, "__esModule", {
 exports.Enum = void 0;
 var Enum = {
   messageType: {
-    normal: 1,
-    entryGroup: 2,
-    addFriend: 3,
-    binary: 4,
-    userEntry: 5,
-    userExit: 6
+    text: 1,
+    //消息类型-普通文本消息
+    image: 2,
+    //消息类型-图片文件
+    audio: 3,
+    //消息类型-语音文件
+    video: 4 //消息类型-视频文件
   }
 };
-
 // const (
-// 	MessageTypeNormal     = 1 //消息类型-普通文本消息
-// 	MessageTypeEntryGroup = 2 //消息类型-用户加入群聊消息
-// 	MessageTypeAddFriend  = 3 //消息类型-加好友消息
-// 	MessageTypeBinary     = 4 //消息类型-二进制类型
-// 	MessageTypeUserEntry  = 5 //消息类型-用户上线
-// 	MessageTypeUserExit   = 6 //消息类型-用户下线
+// 	MessageTypeText  = 1 //消息类型-普通文本消息
+// 	MessageTypeImage = 2 //消息类型-图片文件
+// 	MessageTypeAudio = 3 //消息类型-语音文件
+// 	MessageTypeVideo = 4 //消息类型-视频文件
 // )
 exports.Enum = Enum;
 
@@ -9860,6 +9859,7 @@ exports.getRoomList = getRoomList;
 exports.login = login;
 exports.phoneLogin = phoneLogin;
 exports.searchUser = searchUser;
+exports.sendMessage = sendMessage;
 exports.setMessageReadStatus = setMessageReadStatus;
 exports.uploadFile = uploadFile;
 exports.userDetail = userDetail;
@@ -9898,12 +9898,13 @@ function userInfoSave(data) {
     data: data
   });
 }
-function uploadFile(filepath) {
+function uploadFile(data) {
   return (0, _request.uploadSingleFile)({
     api: '/api/im/upload',
     method: 'POST',
     loading: true,
-    filepath: filepath
+    filepath: data.filepath,
+    formData: data.formData
   });
 }
 function searchUser(data) {
@@ -9957,6 +9958,14 @@ function setMessageReadStatus(data) {
 function getMessageList(data) {
   return (0, _request.request)({
     api: '/api/im/getMessageList',
+    method: 'POST',
+    loading: true,
+    data: data
+  });
+}
+function sendMessage(data) {
+  return (0, _request.request)({
+    api: '/api/im/sendMessage',
     method: 'POST',
     loading: true,
     data: data
@@ -10071,6 +10080,8 @@ function request(config) {
     });
   });
 }
+
+// uploadSingleFile 微信小程序只支持单文件上传
 function uploadSingleFile(config) {
   var _uni$getStorageSync;
   var host = (0, _config.getChatApiRequestHost)();
@@ -10084,6 +10095,7 @@ function uploadSingleFile(config) {
   //是否显示加载中
   var loading = config.loading ? config.loading : true;
   return new Promise(function (resolve, reject) {
+    var _config$formData;
     if (loading) {
       uni.showLoading();
     }
@@ -10091,6 +10103,7 @@ function uploadSingleFile(config) {
       url: url,
       name: 'file',
       filePath: config.filepath,
+      formData: (_config$formData = config.formData) !== null && _config$formData !== void 0 ? _config$formData : {},
       method: "POST",
       header: header,
       success: function success(res) {

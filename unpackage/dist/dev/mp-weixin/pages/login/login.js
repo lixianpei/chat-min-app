@@ -292,7 +292,12 @@ var _default = {
       var avatar = (_e$detail$avatarUrl = e.detail.avatarUrl) !== null && _e$detail$avatarUrl !== void 0 ? _e$detail$avatarUrl : '';
 
       //获取到微信头像后马上下载到本地，随后上传到服务器
-      (0, _api.uploadFile)(avatar).then(function (res) {
+      (0, _api.uploadFile)({
+        filepath: avatar,
+        formData: {
+          subject: "avatar"
+        }
+      }).then(function (res) {
         console.log("uploadFileOk:", res);
         //设置本地头像信息
         _this3.avatarUrl = res.url;

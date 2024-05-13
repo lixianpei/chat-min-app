@@ -82,7 +82,7 @@ export function request(config) {
 	});
 }
 
-
+// uploadSingleFile 微信小程序只支持单文件上传
 export function uploadSingleFile(config) {
 	let host = getChatApiRequestHost()
 	let url = host + config.api
@@ -103,6 +103,7 @@ export function uploadSingleFile(config) {
 		    url: url,
 			name: 'file',
 		    filePath: config.filepath,
+			formData: config.formData ?? {},
 			method: "POST",
 		    header: header,
 		    success: (res) => {

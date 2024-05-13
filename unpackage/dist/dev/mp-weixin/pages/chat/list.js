@@ -305,16 +305,18 @@ var _default = {
 
       //消息类型
       switch (messageType) {
-        case _enum.Enum.messageType.normal:
+        case _enum.Enum.messageType.text:
           messageContent = message.content;
           break;
-        case _enum.Enum.messageType.addFriend:
-          uni.showToast({
-            title: message.content,
-            duration: 3000,
-            icon: 'none'
-          });
-          return;
+        case _enum.Enum.messageType.image:
+          messageContent = '[图片]';
+          break;
+        case _enum.Enum.messageType.audio:
+          messageContent = '[语音]';
+          break;
+        case _enum.Enum.messageType.audio:
+          messageContent = '[视频]';
+          break;
         default:
           consoel.log("不能处理的消息：", message);
           return;

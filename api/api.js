@@ -38,15 +38,15 @@ export function userInfoSave(data) {
 }
 
 
-export function uploadFile(filepath) {
+export function uploadFile(data) {
 	return uploadSingleFile({
 		api: '/api/im/upload',
 		method: 'POST',
 		loading: true,
-		filepath: filepath
+		filepath: data.filepath,
+		formData: data.formData
 	});
 }
-
 
 export function searchUser(data) {
 	return request({
@@ -104,6 +104,15 @@ export function setMessageReadStatus(data) {
 export function getMessageList(data) {
 	return request({
 		api: '/api/im/getMessageList',
+		method: 'POST',
+		loading: true,
+		data: data
+	})
+}
+
+export function sendMessage(data) {
+	return request({
+		api: '/api/im/sendMessage',
 		method: 'POST',
 		loading: true,
 		data: data

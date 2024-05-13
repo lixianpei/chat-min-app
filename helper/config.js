@@ -8,7 +8,8 @@ const ENV_RELEASE = "release";//正式版
 export function getEnv() {
 	let accountInfo = wx.getAccountInfoSync();
 	let env = accountInfo.miniProgram.envVersion ?? "develop";
-	env = 'develop'
+	// env = 'develop'
+	env = 'test'
 	return env
 }
 

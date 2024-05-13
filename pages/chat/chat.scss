@@ -51,14 +51,18 @@
 	}
 }
 // 右侧箭头聊天框
-.self-message-text {
+.self-message {
 	position: relative;
 	background: #89d961;
 	padding: 20rpx;
 	margin: 0 10rpx 0 90rpx;
 	border-radius: 8rpx;
+	.text {
+		color: black;
+		background-color: #89d961 !important;
+	}
 }
-.self-message-text::after {
+.self-message::after {
 	content: '';
 	position: absolute;
 	top: 20rpx; /* 将箭头放置在div下方 20px */
@@ -69,14 +73,14 @@
 }
 
 // 左侧箭头聊天框
-.other-message-text {
+.other-message {
 	position: relative;
 	background: white;
 	padding: 20rpx;
 	margin: 0 90rpx 0 10rpx;
 	border-radius: 8rpx;
 }
-.other-message-text::after {
+.other-message::after {
 	content: '';
 	position: absolute;
 	top: 20rpx; /* 将箭头放置在div下方 20px */
@@ -85,13 +89,34 @@
 	border-style: solid;
 	border-color: transparent white transparent transparent; /* 箭头颜色和位置 */
 }
+// 消息内容类型1：普通消息
+.message-type-1 {
+	
+}
+// 消息内容类型1：图片消息
+.message-type-2 {
+	background-color: white;
+	border: 1rpx solid #f7f7f7;
+	padding: unset;
+	border-radius: unset;
+	.image {
+		// width: 50vw;
+		.img {
+			// width: 100%;
+			// max-width: 50vw;
+		}
+	}
+}
+.message-type-2::after {
+	content: unset;
+}
 
 // 底部操作区域
 .bottom-operation-tabbar {
 	position: absolute;
 	bottom: 0;
 	left: 0;
-	padding: 20rpx;
+	padding: 25rpx 0;
 	border-top: 2rpx solid #d8d8d8;
 	background-color: #f7f7f7;
 	width: 100vw;
@@ -102,18 +127,26 @@
 		display: flex;
 		flex-direction: row;
 		align-items: flex-end;
+		justify-content: space-between;
 		width: 100%;
+		.icon {
+			width: 45rpx;
+			height: 45rpx;
+			color: black;
+			flex-shrink: 0;
+		}
 		.item {
+			margin: 0 10rpx;
 		}
 		.message-input {
 			background-color: white;
 			padding: 10rpx;
 			border-radius: 10rpx;
 			max-height: 20vh;
+			width: 80%;
 		}
 		.message-send {
 			flex-shrink: 0;
-			margin-left: 20rpx;
 		}
 	}
 }

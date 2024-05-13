@@ -102,6 +102,27 @@ var render = function () {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
+  var l0 = _vm.__map(_vm.messageList, function (message, index) {
+    var $orig = _vm.__get_orig(message)
+    var m0 =
+      message.type == 2 ? _vm.formatShowContentFile(message.content) : null
+    return {
+      $orig: $orig,
+      m0: m0,
+    }
+  })
+  var g0 = _vm.form.textMessage.length
+  var g1 = _vm.form.textMessage.length
+  _vm.$mp.data = Object.assign(
+    {},
+    {
+      $root: {
+        l0: l0,
+        g0: g0,
+        g1: g1,
+      },
+    }
+  )
 }
 var recyclableRender = false
 var staticRenderFns = []
@@ -209,14 +230,34 @@ var _date = __webpack_require__(/*! ../../helper/date.js */ 68);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+// 获取全局唯一的录音管理器 recorderManager
+var recorderManager = uni.getRecorderManager();
+var innerAudioContext = uni.createInnerAudioContext();
+innerAudioContext.autoplay = true;
 var _default = {
   data: function data() {
     return {
-      messageList: [{
-        id: 1,
-        type: 1,
-        content: "ddddddddddd"
-      }],
+      messageList: [],
       isGroupChat: true,
       userInfo: uni.getStorageSync('userInfo'),
       userAvatar: uni.getStorageSync('avatar'),
@@ -227,28 +268,73 @@ var _default = {
       },
 
       pageBottomHeight: 0,
-      roomInfo: {} //聊天室信息
+      roomInfo: {},
+      //聊天室信息
+
+      text: 'uni-app',
+      voicePath: ''
     };
   },
   created: function created() {},
+  computed: {
+    computedClasses: function computedClasses(item) {
+      return function (item) {
+        return {
+          'class1': true,
+          'class2': true // 根据循环中的参数生成类名
+        };
+      };
+    }
+  },
   mounted: function mounted(option) {},
   onLoad: function onLoad(option) {
+    var _this = this;
     //option为object类型，会序列化上个页面传递的参数
     console.log("chat.onLoad.option...", option); //打印出上个页面传递的参数。
     this.handleAsyncInfo(option);
+    recorderManager.onStop(function (res) {
+      console.log('recorder stop' + JSON.stringify(res));
+      console.log(res.tempFilePath);
+      _this.voicePath = res.tempFilePath;
+    });
+
+    // 在页面的逻辑部分（例如 .js 文件中）
+    uni.getSystemInfo({
+      success: function success(res) {
+        // 获取屏幕的可视区域高度
+        var windowHeight = res.windowHeight;
+        // 获取导航栏的高度
+        var navigationBarHeight = res.statusBarHeight + 44; // 假设导航栏高度为状态栏高度加上标题栏高度
+
+        // 计算页面的可视化高度
+        var pageHeight = windowHeight - navigationBarHeight;
+        console.log("页面的可视化高度：" + pageHeight);
+
+        // 在页面的逻辑部分（例如 .js 文件中）
+        uni.createSelectorQuery().select('.bottom-operation-tabbar').boundingClientRect(function (rect) {
+          if (rect) {
+            var elementHeight = rect.height;
+            console.log("元素的高度：" + elementHeight);
+            _this.pageBottomHeight = -(pageHeight + elementHeight);
+          } else {
+            console.log("未找到指定元素");
+          }
+        }).exec();
+      }
+    });
   },
   onShow: function onShow() {
-    var _this = this;
+    var _this2 = this;
     uni.onSocketMessage(function (res) {
       console.log('Chat...收到服务器内容：' + res.data);
-      _this.handleWebsocketData(res.data);
+      _this2.handleWebsocketData(res.data);
     });
   },
   methods: {
     handleAsyncInfo: function handleAsyncInfo(option) {
-      var _this2 = this;
+      var _this3 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
-        var _option$roomId, _this2$roomInfo$roomI;
+        var _option$roomId, _this3$roomInfo$roomI;
         return _regenerator.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
@@ -265,15 +351,15 @@ var _default = {
                     console.log("聊天室信息无法获取：", res);
                     return;
                   }
-                  _this2.roomInfo = roomInfo;
+                  _this3.roomInfo = roomInfo;
 
                   //查询好友信息
                   var roomTitle = "";
                   if (roomInfo.type == 1) {
-                    var _this2$friendInfo$nic;
+                    var _this3$friendInfo$nic;
                     //私聊好友数据更新
-                    _this2.friendInfo = _this2.getFriendInfoByRoomUserListData(roomInfo.users);
-                    roomTitle = (_this2$friendInfo$nic = _this2.friendInfo.nickname) !== null && _this2$friendInfo$nic !== void 0 ? _this2$friendInfo$nic : "--";
+                    _this3.friendInfo = _this3.getFriendInfoByRoomUserListData(roomInfo.users);
+                    roomTitle = (_this3$friendInfo$nic = _this3.friendInfo.nickname) !== null && _this3$friendInfo$nic !== void 0 ? _this3$friendInfo$nic : "--";
                   } else if (roomInfo.type == 2) {
                     //群聊
                     roomTitle = roomInfo.title;
@@ -302,12 +388,12 @@ var _default = {
                 return (0, _api.getMessageList)({
                   page: 1,
                   pageSize: 10000,
-                  roomId: _this2.roomInfo.roomId
+                  roomId: _this3.roomInfo.roomId
                 }).then(function (res) {
                   // console.log(res)
                   if (res.list) {
-                    _this2.messageList = res.list;
-                    _this2.$forceUpdate(); // 强制组件重新渲染
+                    _this3.messageList = res.list;
+                    _this3.$forceUpdate(); // 强制组件重新渲染
                   }
                 });
               case 6:
@@ -315,13 +401,13 @@ var _default = {
                 console.log('消息设置已读---------------1');
                 _context.next = 9;
                 return (0, _api.setMessageReadStatus)({
-                  roomId: parseInt((_this2$roomInfo$roomI = _this2.roomInfo.roomId) !== null && _this2$roomInfo$roomI !== void 0 ? _this2$roomInfo$roomI : 0)
+                  roomId: parseInt((_this3$roomInfo$roomI = _this3.roomInfo.roomId) !== null && _this3$roomInfo$roomI !== void 0 ? _this3$roomInfo$roomI : 0)
                 }).then(function (res) {
                   console.log(res);
                 });
               case 9:
-                _this2.$nextTick(function () {
-                  _this2.scrollToBottom();
+                _this3.$nextTick(function () {
+                  _this3.scrollToBottom();
                 });
               case 10:
               case "end":
@@ -344,7 +430,8 @@ var _default = {
     },
     // 点击发送消息
     clickSendMessage: function clickSendMessage() {
-      var _this$roomInfo$roomId;
+      var _this$roomInfo$roomId,
+        _this4 = this;
       if (this.form.textMessage.lenght <= 0) {
         console.log('请输入消息');
         return;
@@ -355,36 +442,42 @@ var _default = {
 
       //考虑先把消息显示，后续接收到消息后标记为发生成功 TODO
       // 需要增加前端自定义消息ID，这样能判断服务器回收后的消息ID，这样能判断是否上传成功
-      this.showSelfMessage(this.form.textMessage);
-      console.log("消息准备推送到服务器");
-      var messageJson = JSON.stringify({
-        "type": _enum.Enum.messageType.normal,
+      (0, _api.sendMessage)({
+        "type": _enum.Enum.messageType.text,
         //目前仅支持text
         "receiver": receiver,
         "roomId": parseInt((_this$roomInfo$roomId = this.roomInfo.roomId) !== null && _this$roomInfo$roomId !== void 0 ? _this$roomInfo$roomId : 0),
         //暂不支持
         "content": this.form.textMessage
+      }).then(function (res) {
+        console.log('sendMessageRes', res);
+        _this4.showSelfMessage(res);
+        _this4.form.textMessage = "";
       });
-      uni.sendSocketMessage({
-        data: messageJson
-      });
-      this.form.textMessage = "";
+
+      // console.log("消息准备推送到服务器")
+      // let messageJson = JSON.stringify({
+      // 	"type": Enum.messageType.text,//目前仅支持text
+      // 	"receiver": receiver,
+      // 	"roomId": parseInt(this.roomInfo.roomId ?? 0),//暂不支持
+      // 	"content": this.form.textMessage,
+      // })
+      // uni.sendSocketMessage({
+      // 	data: messageJson
+      // });
+
+      // this.form.textMessage = ""
 
       //发送消息到ws服务器
     },
     // 显示自己的消息在聊天页面
-    showSelfMessage: function showSelfMessage(content, messageType) {
-      var _this3 = this;
-      this.messageList.push({
-        id: 0,
-        type: _enum.Enum.messageType.normal,
-        sender: this.userInfo.id,
-        receiver: this.friendInfo.id,
-        content: content,
-        createdAt: (0, _date.getDatetime)()
-      });
+    showSelfMessage: function showSelfMessage(message) {
+      var _message$messageId,
+        _this5 = this;
+      message.id = (_message$messageId = message.messageId) !== null && _message$messageId !== void 0 ? _message$messageId : 0;
+      this.messageList.push(message);
       this.$nextTick(function () {
-        _this3.scrollToBottom();
+        _this5.scrollToBottom();
       });
     },
     // 显示他人的消息在聊天页面
@@ -392,7 +485,7 @@ var _default = {
       this.messageList.push(messageData);
     },
     handleWebsocketData: function handleWebsocketData(message) {
-      var _this4 = this;
+      var _this6 = this;
       if (message == "ping") {
         //发送pong返回给服务器
       } else {
@@ -409,12 +502,12 @@ var _default = {
           console.log("\u6D88\u606F\u6765\u4E86\uFF0C\u4F46\u4E0D\u5C5E\u4E8E\u5F53\u524D\u804A\u5929\u5BA4\u7684\u597D\u53CB\u4FE1\u606F\uFF0C\u6682\u4E0D\u663E\u793A\uFF0C\uFF0C\u5F53\u524D\u804A\u5929\u6846\u597D\u53CBID=".concat(friendId, " sender=").concat(sender, " receiver=").concat(receiver, " groupId=").concat(groupId));
           return;
         }
-        var messageTypes = [1, 2, 3, 4, 5, 6];
+        var messageTypes = [1, 2, 3, 4];
         if (messageTypes.includes(messageData.type)) {
           console.log("能处理的消息：", messageData);
           this.messageList.push(messageData);
           this.$nextTick(function () {
-            _this4.scrollToBottom();
+            _this6.scrollToBottom();
           });
         } else {
           //不支持显示的消息
@@ -434,7 +527,94 @@ var _default = {
     inputBlur: function inputBlur() {
       console.log("inputBlur....");
       this.pageBottomHeight = 0;
-    }
+    },
+    getClass: function getClass() {
+      return 'getClass';
+    },
+    formatShowContentFile: function formatShowContentFile(content) {
+      var _data$filepath;
+      //文件类消息处理为json数据
+      var data = JSON.parse(content);
+      return (_data$filepath = data.filepath) !== null && _data$filepath !== void 0 ? _data$filepath : "";
+    },
+    chooseMedia: function chooseMedia() {
+      var _this7 = this;
+      uni.chooseMedia({
+        count: 3,
+        mediaType: ['image', 'video'],
+        sourceType: ['album', 'camera'],
+        maxDuration: 30,
+        camera: 'back',
+        success: function success(loaclFileRes) {
+          var _loaclFileRes$tempFil;
+          console.log("loaclFileRes.....", loaclFileRes.tempFiles);
+          var filepath = (_loaclFileRes$tempFil = loaclFileRes.tempFiles[0]["tempFilePath"]) !== null && _loaclFileRes$tempFil !== void 0 ? _loaclFileRes$tempFil : "";
+          if (!filepath) {
+            uni.showToast({
+              title: "文件未读取成功，请重新操作",
+              duration: 5000,
+              icon: 'none'
+            });
+            return;
+          }
+          //获取到微信头像后马上下载到本地，随后上传到服务器
+          (0, _api.uploadFile)({
+            filepath: filepath,
+            formData: {
+              subject: "RoomFile"
+            }
+          }).then(function (res) {
+            var _this7$roomInfo$roomI, _res$attachmentId, _res$filepath;
+            console.log("RoomFileUploadFileOk:", res);
+            //构建成图片消息发送
+            (0, _api.sendMessage)({
+              "type": _enum.Enum.messageType.image,
+              //目前仅支持text
+              "receiver": 0,
+              "roomId": parseInt((_this7$roomInfo$roomI = _this7.roomInfo.roomId) !== null && _this7$roomInfo$roomI !== void 0 ? _this7$roomInfo$roomI : 0),
+              "content": JSON.stringify({
+                attachmentId: (_res$attachmentId = res.attachmentId) !== null && _res$attachmentId !== void 0 ? _res$attachmentId : 0,
+                filepath: (_res$filepath = res.filepath) !== null && _res$filepath !== void 0 ? _res$filepath : ""
+              })
+            }).then(function (res) {
+              console.log('sendMessageRes', res);
+              _this7.showSelfMessage(res);
+              _this7.form.textMessage = "";
+            });
+          }).catch(function (f) {
+            console.log("RoomFileUploadFileError", f);
+          });
+        }
+      });
+    },
+    previewImage: function previewImage(message) {
+      var _data$filepath2;
+      //文件类消息处理为json数据
+      var data = JSON.parse(message.content);
+      var imgArr = [];
+      imgArr.push((_data$filepath2 = data.filepath) !== null && _data$filepath2 !== void 0 ? _data$filepath2 : "");
+      //预览图片
+      uni.previewImage({
+        urls: imgArr,
+        current: imgArr[0]
+      });
+    },
+    // =================== 录音模块 ===================
+    startRecord: function startRecord() {
+      console.log('开始录音');
+      recorderManager.start();
+    },
+    endRecord: function endRecord() {
+      console.log('录音结束');
+      recorderManager.stop();
+    },
+    playVoice: function playVoice() {
+      console.log('播放录音');
+      if (this.voicePath) {
+        innerAudioContext.src = this.voicePath;
+        innerAudioContext.play();
+      }
+    } // =================== 录音模块 ===================
   }
 };
 exports.default = _default;
