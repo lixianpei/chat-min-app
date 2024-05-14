@@ -29,6 +29,14 @@
 			.text {
 				background-color: white;
 			}
+			.audio {
+				display: flex;
+				.icon {
+					width: 50rpx;
+					height: 50rpx;
+					padding-left: 10rpx;
+				}
+			}
 		}
 	}
 	.message-left {

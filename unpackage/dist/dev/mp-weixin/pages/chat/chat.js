@@ -106,9 +106,14 @@ var render = function () {
     var $orig = _vm.__get_orig(message)
     var m0 =
       message.type == 2 ? _vm.formatShowContentFile(message.content) : null
+    var m1 =
+      message.type == 3
+        ? _vm.formatShowContentAudioDuration(message.content)
+        : null
     return {
       $orig: $orig,
       m0: m0,
+      m1: m1,
     }
   })
   var g0 = _vm.form.textMessage.length
@@ -249,6 +254,7 @@ var _date = __webpack_require__(/*! ../../helper/date.js */ 68);
 //
 //
 //
+//
 
 // 获取全局唯一的录音管理器 recorderManager
 var recorderManager = uni.getRecorderManager();
@@ -271,7 +277,9 @@ var _default = {
       roomInfo: {},
       //聊天室信息
 
-      text: 'uni-app',
+      // text: 'uni-app',
+      audioIsOk: false,
+      //录音是否有效：邮箱时将录音文件发送到服务器
       voicePath: ''
     };
   },
@@ -288,15 +296,51 @@ var _default = {
   },
   mounted: function mounted(option) {},
   onLoad: function onLoad(option) {
+    var _this2 = this;
+    // let self = this;
+    // recorderManager.onStop(function (res) {
+    // 	console.log('recorder stop' + JSON.stringify(res));
+    // 	self.voicePath = res.tempFilePath;
+    // });
+
     var _this = this;
+    recorderManager.onStop(function (audioRes) {
+      console.log('录音回调事件：' + JSON.stringify(audioRes));
+      console.log(audioRes.tempFilePath);
+      _this.voicePath = audioRes.tempFilePath;
+      if (!_this.audioIsOk) {
+        console.log('用户取消录音发送');
+        return;
+      }
+      //上传文件
+      (0, _api.uploadFile)({
+        filepath: _this.voicePath,
+        formData: {
+          subject: "RoomAudioFile"
+        }
+      }).then(function (fileRes) {
+        var _this$roomInfo$roomId, _fileRes$attachmentId, _fileRes$filepath;
+        console.log("uploadRadioRes:", fileRes);
+        //构建成语音文件消息发送
+        (0, _api.sendMessage)({
+          "type": _enum.Enum.messageType.audio,
+          "receiver": 0,
+          "roomId": parseInt((_this$roomInfo$roomId = _this.roomInfo.roomId) !== null && _this$roomInfo$roomId !== void 0 ? _this$roomInfo$roomId : 0),
+          "content": JSON.stringify({
+            attachmentId: (_fileRes$attachmentId = fileRes.attachmentId) !== null && _fileRes$attachmentId !== void 0 ? _fileRes$attachmentId : 0,
+            filepath: (_fileRes$filepath = fileRes.filepath) !== null && _fileRes$filepath !== void 0 ? _fileRes$filepath : "",
+            duration: audioRes.duration
+          })
+        }).then(function (messageRes) {
+          console.log('sendAudioMessageRes', messageRes);
+          _this.showSelfMessage(messageRes);
+        });
+      });
+    });
+
     //option为object类型，会序列化上个页面传递的参数
     console.log("chat.onLoad.option...", option); //打印出上个页面传递的参数。
     this.handleAsyncInfo(option);
-    recorderManager.onStop(function (res) {
-      console.log('recorder stop' + JSON.stringify(res));
-      console.log(res.tempFilePath);
-      _this.voicePath = res.tempFilePath;
-    });
 
     // 在页面的逻辑部分（例如 .js 文件中）
     uni.getSystemInfo({
@@ -315,7 +359,7 @@ var _default = {
           if (rect) {
             var elementHeight = rect.height;
             console.log("元素的高度：" + elementHeight);
-            _this.pageBottomHeight = -(pageHeight + elementHeight);
+            _this2.pageBottomHeight = -(pageHeight + elementHeight);
           } else {
             console.log("未找到指定元素");
           }
@@ -324,17 +368,17 @@ var _default = {
     });
   },
   onShow: function onShow() {
-    var _this2 = this;
+    var _this3 = this;
     uni.onSocketMessage(function (res) {
       console.log('Chat...收到服务器内容：' + res.data);
-      _this2.handleWebsocketData(res.data);
+      _this3.handleWebsocketData(res.data);
     });
   },
   methods: {
     handleAsyncInfo: function handleAsyncInfo(option) {
-      var _this3 = this;
+      var _this4 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
-        var _option$roomId, _this3$roomInfo$roomI;
+        var _option$roomId, _this4$roomInfo$roomI;
         return _regenerator.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
@@ -351,15 +395,15 @@ var _default = {
                     console.log("聊天室信息无法获取：", res);
                     return;
                   }
-                  _this3.roomInfo = roomInfo;
+                  _this4.roomInfo = roomInfo;
 
                   //查询好友信息
                   var roomTitle = "";
                   if (roomInfo.type == 1) {
-                    var _this3$friendInfo$nic;
+                    var _this4$friendInfo$nic;
                     //私聊好友数据更新
-                    _this3.friendInfo = _this3.getFriendInfoByRoomUserListData(roomInfo.users);
-                    roomTitle = (_this3$friendInfo$nic = _this3.friendInfo.nickname) !== null && _this3$friendInfo$nic !== void 0 ? _this3$friendInfo$nic : "--";
+                    _this4.friendInfo = _this4.getFriendInfoByRoomUserListData(roomInfo.users);
+                    roomTitle = (_this4$friendInfo$nic = _this4.friendInfo.nickname) !== null && _this4$friendInfo$nic !== void 0 ? _this4$friendInfo$nic : "--";
                   } else if (roomInfo.type == 2) {
                     //群聊
                     roomTitle = roomInfo.title;
@@ -388,12 +432,12 @@ var _default = {
                 return (0, _api.getMessageList)({
                   page: 1,
                   pageSize: 10000,
-                  roomId: _this3.roomInfo.roomId
+                  roomId: _this4.roomInfo.roomId
                 }).then(function (res) {
                   // console.log(res)
                   if (res.list) {
-                    _this3.messageList = res.list;
-                    _this3.$forceUpdate(); // 强制组件重新渲染
+                    _this4.messageList = res.list;
+                    _this4.$forceUpdate(); // 强制组件重新渲染
                   }
                 });
               case 6:
@@ -401,13 +445,13 @@ var _default = {
                 console.log('消息设置已读---------------1');
                 _context.next = 9;
                 return (0, _api.setMessageReadStatus)({
-                  roomId: parseInt((_this3$roomInfo$roomI = _this3.roomInfo.roomId) !== null && _this3$roomInfo$roomI !== void 0 ? _this3$roomInfo$roomI : 0)
+                  roomId: parseInt((_this4$roomInfo$roomI = _this4.roomInfo.roomId) !== null && _this4$roomInfo$roomI !== void 0 ? _this4$roomInfo$roomI : 0)
                 }).then(function (res) {
                   console.log(res);
                 });
               case 9:
-                _this3.$nextTick(function () {
-                  _this3.scrollToBottom();
+                _this4.$nextTick(function () {
+                  _this4.scrollToBottom();
                 });
               case 10:
               case "end":
@@ -430,8 +474,8 @@ var _default = {
     },
     // 点击发送消息
     clickSendMessage: function clickSendMessage() {
-      var _this$roomInfo$roomId,
-        _this4 = this;
+      var _this$roomInfo$roomId2,
+        _this5 = this;
       if (this.form.textMessage.lenght <= 0) {
         console.log('请输入消息');
         return;
@@ -446,13 +490,13 @@ var _default = {
         "type": _enum.Enum.messageType.text,
         //目前仅支持text
         "receiver": receiver,
-        "roomId": parseInt((_this$roomInfo$roomId = this.roomInfo.roomId) !== null && _this$roomInfo$roomId !== void 0 ? _this$roomInfo$roomId : 0),
+        "roomId": parseInt((_this$roomInfo$roomId2 = this.roomInfo.roomId) !== null && _this$roomInfo$roomId2 !== void 0 ? _this$roomInfo$roomId2 : 0),
         //暂不支持
         "content": this.form.textMessage
       }).then(function (res) {
         console.log('sendMessageRes', res);
-        _this4.showSelfMessage(res);
-        _this4.form.textMessage = "";
+        _this5.showSelfMessage(res);
+        _this5.form.textMessage = "";
       });
 
       // console.log("消息准备推送到服务器")
@@ -473,11 +517,11 @@ var _default = {
     // 显示自己的消息在聊天页面
     showSelfMessage: function showSelfMessage(message) {
       var _message$messageId,
-        _this5 = this;
+        _this6 = this;
       message.id = (_message$messageId = message.messageId) !== null && _message$messageId !== void 0 ? _message$messageId : 0;
       this.messageList.push(message);
       this.$nextTick(function () {
-        _this5.scrollToBottom();
+        _this6.scrollToBottom();
       });
     },
     // 显示他人的消息在聊天页面
@@ -485,7 +529,7 @@ var _default = {
       this.messageList.push(messageData);
     },
     handleWebsocketData: function handleWebsocketData(message) {
-      var _this6 = this;
+      var _this7 = this;
       if (message == "ping") {
         //发送pong返回给服务器
       } else {
@@ -507,7 +551,7 @@ var _default = {
           console.log("能处理的消息：", messageData);
           this.messageList.push(messageData);
           this.$nextTick(function () {
-            _this6.scrollToBottom();
+            _this7.scrollToBottom();
           });
         } else {
           //不支持显示的消息
@@ -537,8 +581,17 @@ var _default = {
       var data = JSON.parse(content);
       return (_data$filepath = data.filepath) !== null && _data$filepath !== void 0 ? _data$filepath : "";
     },
+    formatShowContentAudioDuration: function formatShowContentAudioDuration(content) {
+      var _data$duration;
+      //文件类消息处理为json数据
+      var data = JSON.parse(content);
+      var d = (_data$duration = data.duration) !== null && _data$duration !== void 0 ? _data$duration : 0;
+      d = d <= 0 ? 0 : Math.floor(parseInt(d) / 1000);
+      console.log(content, d);
+      return d + "''";
+    },
     chooseMedia: function chooseMedia() {
-      var _this7 = this;
+      var _this8 = this;
       uni.chooseMedia({
         count: 3,
         mediaType: ['image', 'video'],
@@ -564,22 +617,22 @@ var _default = {
               subject: "RoomFile"
             }
           }).then(function (res) {
-            var _this7$roomInfo$roomI, _res$attachmentId, _res$filepath;
+            var _this8$roomInfo$roomI, _res$attachmentId, _res$filepath;
             console.log("RoomFileUploadFileOk:", res);
             //构建成图片消息发送
             (0, _api.sendMessage)({
               "type": _enum.Enum.messageType.image,
               //目前仅支持text
               "receiver": 0,
-              "roomId": parseInt((_this7$roomInfo$roomI = _this7.roomInfo.roomId) !== null && _this7$roomInfo$roomI !== void 0 ? _this7$roomInfo$roomI : 0),
+              "roomId": parseInt((_this8$roomInfo$roomI = _this8.roomInfo.roomId) !== null && _this8$roomInfo$roomI !== void 0 ? _this8$roomInfo$roomI : 0),
               "content": JSON.stringify({
                 attachmentId: (_res$attachmentId = res.attachmentId) !== null && _res$attachmentId !== void 0 ? _res$attachmentId : 0,
                 filepath: (_res$filepath = res.filepath) !== null && _res$filepath !== void 0 ? _res$filepath : ""
               })
             }).then(function (res) {
               console.log('sendMessageRes', res);
-              _this7.showSelfMessage(res);
-              _this7.form.textMessage = "";
+              _this8.showSelfMessage(res);
+              _this8.form.textMessage = "";
             });
           }).catch(function (f) {
             console.log("RoomFileUploadFileError", f);
@@ -599,20 +652,37 @@ var _default = {
         current: imgArr[0]
       });
     },
-    // =================== 录音模块 ===================
-    startRecord: function startRecord() {
-      console.log('开始录音');
+    // =================== 录音模块 ===================			
+    startAudio: function startAudio() {
+      var _this9 = this;
+      console.log('用户开始录音');
       recorderManager.start();
+      uni.showModal({
+        title: '温馨提示',
+        content: '正在录音中，点击完成后录音立即发送',
+        cancelText: '取消',
+        confirmText: '完成',
+        success: function success(res) {
+          if (res.confirm) {
+            console.log('用户完成录音', recorderManager);
+            recorderManager.stop();
+            _this9.audioIsOk = true;
+          } else if (res.cancel) {
+            console.log('用户取消录音', recorderManager);
+            recorderManager.stop();
+            _this9.audioIsOk = false;
+          }
+        }
+      });
     },
-    endRecord: function endRecord() {
-      console.log('录音结束');
-      recorderManager.stop();
-    },
-    playVoice: function playVoice() {
+    audioPlay: function audioPlay(content) {
       console.log('播放录音');
-      if (this.voicePath) {
-        innerAudioContext.src = this.voicePath;
+      var data = JSON.parse(content);
+      if (data.filepath) {
+        innerAudioContext.src = data.filepath;
         innerAudioContext.play();
+      } else {
+        console.log('录入文件不存在');
       }
     } // =================== 录音模块 ===================
   }

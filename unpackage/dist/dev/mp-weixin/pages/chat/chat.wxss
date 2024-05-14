@@ -35,6 +35,14 @@
 .message-list .message-box .content .text.data-v-bf16e7f4 {
   background-color: white;
 }
+.message-list .message-box .content .audio.data-v-bf16e7f4 {
+  display: flex;
+}
+.message-list .message-box .content .audio .icon.data-v-bf16e7f4 {
+  width: 50rpx;
+  height: 50rpx;
+  padding-left: 10rpx;
+}
 .message-list .message-left.data-v-bf16e7f4 {
   flex-direction: row;
 }

@@ -33,6 +33,12 @@
 								<image class="img" :src="formatShowContentFile(message.content)" mode="aspectFit" style="max-width: 60vw;" @click="previewImage(message)"></image>
 							</view>
 							
+							<!-- 语音消息 -->
+							<view v-if="message.type == 3" class="audio">
+								{{formatShowContentAudioDuration(message.content)}} &nbsp;&nbsp;
+								<image class="icon" src="../../static/audio.png" @click="audioPlay(message.content)"></image>
+							</view>
+							
 							<view class="message-time">{{message.createdAt}}</view>
 						</view>
 					</view>
@@ -46,15 +52,10 @@
 		
 		<view id="viewBottomTag"></view>
 		
-		<view style="display: none;">
-			<button @tap="startRecord">开始录音</button>
-			<button @tap="endRecord">停止录音</button>
-			<button @tap="playVoice">播放录音</button>
-		</view>
-		
 		<view class="bottom-operation-tabbar">
 			<view class="tabbar-list">
-				<image class="icon item" src="../../static/voice.png"></image>
+				
+				<image @tap="startAudio" class="icon item" src="../../static/voice.png"></image>
 				<textarea 
 					v-model="form.textMessage" 
 					class="uni-input item message-input"
@@ -104,7 +105,8 @@
 				pageBottomHeight: 0,
 				roomInfo: {},//聊天室信息
 				
-				text: 'uni-app',
+				// text: 'uni-app',
+				audioIsOk: false,//录音是否有效：邮箱时将录音文件发送到服务器
 				voicePath: ''
 			}
 		},
@@ -123,16 +125,50 @@
 		mounted(option) {
 		},
 		onLoad: function (option) {
+			// let self = this;
+			// recorderManager.onStop(function (res) {
+			// 	console.log('recorder stop' + JSON.stringify(res));
+			// 	self.voicePath = res.tempFilePath;
+			// });
+					
+			let _this = this
+			recorderManager.onStop(function(audioRes) {
+				console.log('录音回调事件：' + JSON.stringify(audioRes));
+				console.log(audioRes.tempFilePath)
+				_this.voicePath = audioRes.tempFilePath;
+				if (!_this.audioIsOk) {
+					console.log('用户取消录音发送')
+					return
+				}
+				//上传文件
+				uploadFile({
+					filepath: _this.voicePath,
+					formData: {
+						subject: "RoomAudioFile"
+					}
+				}).then(fileRes => {
+					console.log("uploadRadioRes:",fileRes)
+					//构建成语音文件消息发送
+					sendMessage({
+						"type": Enum.messageType.audio,
+						"receiver": 0,
+						"roomId": parseInt(_this.roomInfo.roomId ?? 0),
+						"content": JSON.stringify({
+							attachmentId: fileRes.attachmentId ?? 0,
+							filepath: fileRes.filepath ?? "",
+							duration: audioRes.duration
+						}),
+					}).then(messageRes => {
+						console.log('sendAudioMessageRes',messageRes)
+						_this.showSelfMessage(messageRes)
+					})
+				})
+			});
+			
 			
 			//option为object类型，会序列化上个页面传递的参数
 			console.log("chat.onLoad.option...",option); //打印出上个页面传递的参数。
 			this.handleAsyncInfo(option)
-			
-			recorderManager.onStop((res) => {
-				console.log('recorder stop' + JSON.stringify(res));
-				console.log(res.tempFilePath)
-				this.voicePath = res.tempFilePath;
-			});
 			
 			// 在页面的逻辑部分（例如 .js 文件中）
 			uni.getSystemInfo({
@@ -359,6 +395,14 @@
 				let data = JSON.parse(content)
 				return data.filepath ?? ""
 			},
+			formatShowContentAudioDuration(content) {
+				//文件类消息处理为json数据
+				let data = JSON.parse(content)
+				let d = data.duration ?? 0
+				d = d <= 0 ? 0 : Math.floor(parseInt(d) / 1000)
+				console.log(content,d)
+				return d + "''"
+			},
 			chooseMedia() {
 				uni.chooseMedia({
 				  count: 3,
@@ -418,24 +462,40 @@
 				});
 			},
 			
-			// =================== 录音模块 ===================
-			startRecord() {
-				console.log('开始录音');
-	
+			// =================== 录音模块 ===================			
+			startAudio() {
+				console.log('用户开始录音')
 				recorderManager.start();
+				
+				uni.showModal({
+					title: '温馨提示',
+					content: '正在录音中，点击完成后录音立即发送',
+					cancelText: '取消',
+					confirmText: '完成',
+					success: (res) => {
+						if (res.confirm) {
+							console.log('用户完成录音',recorderManager);
+							recorderManager.stop()
+							this.audioIsOk = true
+						} else if (res.cancel) {
+							console.log('用户取消录音',recorderManager);
+							recorderManager.stop();
+							this.audioIsOk = false
+						}
+					}
+				});
+
 			},
-			endRecord() {
-				console.log('录音结束');
-				recorderManager.stop();
-			},
-			playVoice() {
+			audioPlay(content) {
 				console.log('播放录音');
-	
-				if (this.voicePath) {
-					innerAudioContext.src = this.voicePath;
+				let data = JSON.parse(content)
+				if (data.filepath) {
+					innerAudioContext.src = data.filepath;
 					innerAudioContext.play();
+				} else {
+					console.log('录入文件不存在')
 				}
-			}
+			},
 			// =================== 录音模块 ===================
 		}
 	}
