@@ -30,7 +30,7 @@
 							
 							<!-- 图片 -->
 							<view v-if="message.type == 2" class="image">
-								<image class="img" :src="formatShowContentFile(message.content)" mode="aspectFit" style="max-width: 60vw;" @click="previewImage(message)"></image>
+								<image class="img" :src="formatShowContentFile(message.content)" mode="aspect-fit" style="width: 200rpx;height: 200rpx;" @click="previewImage(message)"></image>
 							</view>
 							
 							<!-- 语音消息 -->
@@ -39,7 +39,13 @@
 								<image class="icon" src="../../static/audio.png" @click="audioPlay(message.content)"></image>
 							</view>
 							
-							<view class="message-time">{{message.createdAt}}</view>
+							<!-- 视频 -->
+							<view v-if="message.type == 4" class="video">
+								<video :src="formatShowContentFile(message.content)" enable-danmu danmu-btn controls style="width: 400rpx;height: 400rpx;"></video>
+							</view>
+							            
+										
+							<!-- <view class="message-time">{{message.createdAt}}</view> -->
 						</view>
 					</view>
 				</view>
@@ -52,9 +58,8 @@
 		
 		<view id="viewBottomTag"></view>
 		
-		<view class="bottom-operation-tabbar">
+		<view class="bottom-operation-tabbar" :style="{bottom: keyboardheight + 'px'}">
 			<view class="tabbar-list">
-				
 				<image @tap="startAudio" class="icon item" src="../../static/voice.png"></image>
 				<textarea 
 					v-model="form.textMessage" 
@@ -103,6 +108,7 @@
 					textMessage: "",//文本消息
 				},
 				pageBottomHeight: 0,
+				keyboardheight: 0,
 				roomInfo: {},//聊天室信息
 				
 				// text: 'uni-app',
@@ -180,19 +186,19 @@
 			
 			    // 计算页面的可视化高度
 			    let pageHeight = windowHeight - navigationBarHeight;
-			
+				// this.pageBottomHeight = pageHeight
 			    console.log("页面的可视化高度：" + pageHeight);
 				
 				// 在页面的逻辑部分（例如 .js 文件中）
-				uni.createSelectorQuery().select('.bottom-operation-tabbar').boundingClientRect((rect) => {
-				  if (rect) {
-				    let elementHeight = rect.height;
-				    console.log("元素的高度：" + elementHeight);
-					this.pageBottomHeight = -(pageHeight + elementHeight)
-				  } else {
-				    console.log("未找到指定元素");
-				  }
-				}).exec();
+				// uni.createSelectorQuery().select('.bottom-operation-tabbar').boundingClientRect((rect) => {
+				//   if (rect) {
+				//     let elementHeight = rect.height;
+				//     console.log("元素的高度：" + elementHeight);
+				// 	this.pageBottomHeight = -(pageHeight + elementHeight)
+				//   } else {
+				//     console.log("未找到指定元素");
+				//   }
+				// }).exec();
 
 			  }
 			});
@@ -209,7 +215,7 @@
 		methods: {
 			async handleAsyncInfo(option) {
 				console.log('查询聊天室消息------------')
-				await getRoomList({roomId: option.roomId ?? 0}).then(res => {
+				await getRoomList({roomId: parseInt(option.roomId ?? 0)}).then(res => {
 					console.log("roomList",res)
 					let roomInfo = res[0] ?? ""
 					if (!roomInfo) {
@@ -330,6 +336,7 @@
 			// 显示自己的消息在聊天页面
 			showSelfMessage(message){
 				message.id = message.messageId ?? 0
+				message.createdAt = message.time
 				this.messageList.push(message)
 				this.$nextTick(() => {
 					this.scrollToBottom()
@@ -380,12 +387,14 @@
 				})
 			},
 			inputFocus(e) {
-				console.log("inputFocus....",e.detail.height)
-				this.pageBottomHeight = e.detail.height
+				console.log("inputFocus....e.detail.height",e)
+				this.keyboardheight = e.detail.height
+				this.pageBottomHeight = this.pageBottomHeight + this.keyboardheight
 			},
 			inputBlur() {
 				console.log("inputBlur....")
-				this.pageBottomHeight = 0
+				this.keyboardheight = 0
+				this.pageBottomHeight = this.pageBottomHeight + this.keyboardheight
 			},
 			getClass() {
 				return 'getClass'
@@ -400,7 +409,6 @@
 				let data = JSON.parse(content)
 				let d = data.duration ?? 0
 				d = d <= 0 ? 0 : Math.floor(parseInt(d) / 1000)
-				console.log(content,d)
 				return d + "''"
 			},
 			chooseMedia() {
@@ -411,7 +419,7 @@
 				  maxDuration: 30,
 				  camera: 'back',
 				  success: (loaclFileRes) =>  {
-				    console.log("loaclFileRes.....",loaclFileRes.tempFiles)
+				    console.log("loaclFileRes.....",loaclFileRes)
 					let filepath = loaclFileRes.tempFiles[0]["tempFilePath"] ?? ""
 					if (!filepath) {
 						uni.showToast({
@@ -430,8 +438,12 @@
 					}).then(res => {
 						console.log("RoomFileUploadFileOk:", res)
 						//构建成图片消息发送
+						let type = Enum.messageType.image
+						if (loaclFileRes.type == "video") {
+							type = Enum.messageType.video
+						}
 						sendMessage({
-							"type": Enum.messageType.image,//目前仅支持text
+							"type": type,
 							"receiver": 0,
 							"roomId": parseInt(this.roomInfo.roomId ?? 0),
 							"content": JSON.stringify({

@@ -109,11 +109,20 @@
   padding: unset;
   border-radius: unset;
 }
+.message-type-4.data-v-bf16e7f4 {
+  background-color: transparent;
+  border: unset;
+  padding: unset;
+  border-radius: unset;
+}
 .message-type-2.data-v-bf16e7f4::after {
   content: unset;
 }
+.message-type-4.data-v-bf16e7f4::after {
+  content: unset;
+}
 .bottom-operation-tabbar.data-v-bf16e7f4 {
-  position: absolute;
+  position: fixed;
   bottom: 0;
   left: 0;
   padding: 25rpx 0;

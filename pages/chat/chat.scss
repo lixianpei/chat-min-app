@@ -107,21 +107,28 @@
 	border: 1rpx solid #f7f7f7;
 	padding: unset;
 	border-radius: unset;
-	.image {
-		// width: 50vw;
-		.img {
-			// width: 100%;
-			// max-width: 50vw;
-		}
-	}
 }
+// 消息内容类型4：视频消息
+.message-type-4 {
+	background-color: transparent;
+	border: unset;
+	padding: unset;
+	border-radius: unset;
+}
+
+// 图片
 .message-type-2::after {
+	content: unset;
+}
+
+// 视频
+.message-type-4::after {
 	content: unset;
 }
 
 // 底部操作区域
 .bottom-operation-tabbar {
-	position: absolute;
+	position: fixed;
 	bottom: 0;
 	left: 0;
 	padding: 25rpx 0;

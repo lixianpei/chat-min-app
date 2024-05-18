@@ -247,7 +247,7 @@ var _default = {
       for (var i = 0; i < res.length; i++) {
         var _item$lastMessage, _item$lastMessageId, _item$unreadCount;
         var item = res[i];
-        var lastMessage = (_item$lastMessage = item.lastMessage) !== null && _item$lastMessage !== void 0 ? _item$lastMessage : null;
+        var _lastMessage = (_item$lastMessage = item.lastMessage) !== null && _item$lastMessage !== void 0 ? _item$lastMessage : null;
         var lastMessageId = (_item$lastMessageId = item.lastMessageId) !== null && _item$lastMessageId !== void 0 ? _item$lastMessageId : 0;
         var avatarUrls = [];
         if (item.avatarUrls.length > 0) {
@@ -263,8 +263,8 @@ var _default = {
           type: item.type,
           //聊天类型
           title: item.title,
-          lastMessageData: lastMessage && lastMessage.content ? lastMessage.content : "",
-          lastMessageTime: lastMessage && lastMessage.messageId > 0 ? lastMessage.createdAt : "",
+          lastMessageData: _lastMessage && _lastMessage.content ? _this.formatContent(_lastMessage.type, _lastMessage.content) : "",
+          lastMessageTime: _lastMessage && _lastMessage.messageId > 0 ? _lastMessage.createdAt : "",
           avatarList: avatarUrls,
           unread: (_item$unreadCount = item.unreadCount) !== null && _item$unreadCount !== void 0 ? _item$unreadCount : 0
         });
@@ -277,6 +277,27 @@ var _default = {
       uni.navigateTo({
         url: "/pages/chat/chat?roomId=".concat(chat.roomId)
       });
+    },
+    formatContent: function formatContent(messageType, content) {
+      //消息类型
+      var messageContent = "";
+      switch (messageType) {
+        case _enum.Enum.messageType.text:
+          messageContent = content;
+          break;
+        case _enum.Enum.messageType.image:
+          messageContent = '[图片]';
+          break;
+        case _enum.Enum.messageType.audio:
+          messageContent = '[语音]';
+          break;
+        case _enum.Enum.messageType.video:
+          messageContent = '[视频]';
+          break;
+        default:
+          messageContent = message.content;
+      }
+      return messageContent;
     },
     handleWebsocketData: function handleWebsocketData(message) {
       var _message$time, _message$roomInfo, _message$senderInfo;
@@ -304,23 +325,7 @@ var _default = {
       }
 
       //消息类型
-      switch (messageType) {
-        case _enum.Enum.messageType.text:
-          messageContent = message.content;
-          break;
-        case _enum.Enum.messageType.image:
-          messageContent = '[图片]';
-          break;
-        case _enum.Enum.messageType.audio:
-          messageContent = '[语音]';
-          break;
-        case _enum.Enum.messageType.audio:
-          messageContent = '[视频]';
-          break;
-        default:
-          consoel.log("不能处理的消息：", message);
-          return;
-      }
+      messageContent = this.formatContent(lastMessage.type, lastMessage.content);
       if (roomType == 1) {
         //私聊
         roomTitie = senderInfo.nickname;

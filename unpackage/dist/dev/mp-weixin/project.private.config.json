@@ -10,7 +10,7 @@
         {
           "name": "pages/chat/chat",
           "pathName": "pages/chat/chat",
-          "query": "roomId=3",
+          "query": "roomId=1",
           "launchMode": "default",
           "scene": null
         },

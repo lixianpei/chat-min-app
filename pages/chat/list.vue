@@ -80,7 +80,7 @@
 						roomId: item.roomId, //消息发送者
 						type: item.type,//聊天类型
 						title: item.title,
-						lastMessageData: lastMessage && lastMessage.content ? lastMessage.content : "",
+						lastMessageData: lastMessage && lastMessage.content ? this.formatContent(lastMessage.type,lastMessage.content) : "",
 						lastMessageTime: lastMessage && lastMessage.messageId > 0 ? lastMessage.createdAt : "",
 						avatarList: avatarUrls,
 						unread: item.unreadCount ?? 0,
@@ -94,6 +94,27 @@
 				uni.navigateTo({
 					url: `/pages/chat/chat?roomId=${chat.roomId}`
 				});
+			},
+			formatContent(messageType, content) {
+				//消息类型
+				let messageContent = ""
+				switch(messageType) {
+					case Enum.messageType.text:
+						messageContent = content
+						break
+					case Enum.messageType.image:
+						messageContent = '[图片]'
+						break
+					case Enum.messageType.audio:
+						messageContent = '[语音]'
+						break
+					case Enum.messageType.video:
+						messageContent = '[视频]'
+						break
+					default:
+						messageContent = message.content
+				}
+				return messageContent
 			},
 			handleWebsocketData(message) {
 				message = JSON.parse(message)
@@ -123,23 +144,7 @@
 				}
 				
 				//消息类型
-				switch(messageType) {
-					case Enum.messageType.text:
-						messageContent = message.content
-						break
-					case Enum.messageType.image:
-						messageContent = '[图片]'
-						break
-					case Enum.messageType.audio:
-						messageContent = '[语音]'
-						break
-					case Enum.messageType.audio:
-						messageContent = '[视频]'
-						break
-					default:
-						consoel.log("不能处理的消息：",message)
-						return
-				}
+				messageContent = this.formatContent(lastMessage.type,lastMessage.content)
 								
 				if (roomType == 1) {
 					//私聊
